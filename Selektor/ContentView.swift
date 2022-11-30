@@ -23,12 +23,13 @@ struct ContentView: View {
                     NavigationLink {
                         SelectorView(config: config).environment(\.managedObjectContext, viewContext)
                     } label: {
-                        Text(config.name!)
+                        Text(config.name ?? "")
                     }
                 }
                 .onDelete(perform: deleteItems)
                 .onMove(perform: moveItems)
             }
+            .listStyle(.grouped)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
@@ -44,21 +45,24 @@ struct ContentView: View {
     }
 
     private func addItem() {
-        withAnimation {
-            let newItem = Config(context: viewContext)
-            newItem.index = (configs.map(\.index).max() ?? 0) + 1
-
-            NavigationLink(destination: SelectorView(config: newItem)) { EmptyView() }
+        let newItem = Config(context: viewContext)
+        newItem.index = (configs.map(\.index).max() ?? 0) + 1
+        newItem.name = "New Config"
+        var i = 1
+        while configs.first(where: { c in c.name == newItem.name }) != nil {
+            i += 1
+            newItem.name = "New Config \(i)"
+        }
+        NavigationLink(destination: SelectorView(config: newItem)) { EmptyView() }
             
-            do {
+            /*do {
                 try viewContext.save()
             } catch {
                 // Replace this implementation with code to handle the error appropriately.
                 // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nsError = error as NSError
                 fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+            }*/
     }
     
     private func moveItems(_ from: IndexSet, _ to: Int) {
