@@ -16,6 +16,22 @@
 		70C18E37293678EB009C09D0 /* SelektorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E36293678EB009C09D0 /* SelektorTests.swift */; };
 		70C18E41293678EB009C09D0 /* SelektorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E40293678EB009C09D0 /* SelektorUITests.swift */; };
 		70C18E43293678EB009C09D0 /* SelektorUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E42293678EB009C09D0 /* SelektorUITestsLaunchTests.swift */; };
+		70C18E562936797C009C09D0 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70C18E552936797C009C09D0 /* WidgetKit.framework */; };
+		70C18E582936797C009C09D0 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70C18E572936797C009C09D0 /* SwiftUI.framework */; };
+		70C18E5B2936797C009C09D0 /* SelektorWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E5A2936797C009C09D0 /* SelektorWatch.swift */; };
+		70C18E5E2936797E009C09D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 70C18E5D2936797E009C09D0 /* Assets.xcassets */; };
+		70C18E602936797E009C09D0 /* SelektorWatch.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E5C2936797C009C09D0 /* SelektorWatch.intentdefinition */; };
+		70C18E6429367CB6009C09D0 /* SelektorWatchExtension.appex in Resources */ = {isa = PBXBuildFile; fileRef = 70C18E532936797C009C09D0 /* SelektorWatchExtension.appex */; };
+		70C18E682936865A009C09D0 /* BackgroundTasks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70C18E672936865A009C09D0 /* BackgroundTasks.framework */; };
+		70C18E6A29369742009C09D0 /* Selector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6929369742009C09D0 /* Selector.swift */; };
+		70C18E6C2936990E009C09D0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6B2936990E009C09D0 /* AppDelegate.swift */; };
+		70C18E6E29369F9C009C09D0 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6D29369F9C009C09D0 /* Result.swift */; };
+		70C18E712936A743009C09D0 /* SwiftMsgpack in Frameworks */ = {isa = PBXBuildFile; productRef = 70C18E702936A743009C09D0 /* SwiftMsgpack */; };
+		70C18E722936A7AB009C09D0 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6D29369F9C009C09D0 /* Result.swift */; };
+		70C18E742936AA83009C09D0 /* SelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E732936AA82009C09D0 /* SelectorView.swift */; };
+		70C18E762936AAF3009C09D0 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E752936AAF3009C09D0 /* Config.swift */; };
+		70C18E782936C770009C09D0 /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E772936C770009C09D0 /* Ext.swift */; };
+		70C18E7A2936DE64009C09D0 /* Duration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E792936DE64009C09D0 /* Duration.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,6 +49,13 @@
 			remoteGlobalIDString = 70C18E1B293678E9009C09D0;
 			remoteInfo = Selektor;
 		};
+		70C18E6529367D11009C09D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 70C18E14293678E9009C09D0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 70C18E522936797C009C09D0;
+			remoteInfo = SelektorWatchExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +72,21 @@
 		70C18E3C293678EB009C09D0 /* SelektorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SelektorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		70C18E40293678EB009C09D0 /* SelektorUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelektorUITests.swift; sourceTree = "<group>"; };
 		70C18E42293678EB009C09D0 /* SelektorUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelektorUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		70C18E532936797C009C09D0 /* SelektorWatchExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SelektorWatchExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		70C18E552936797C009C09D0 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		70C18E572936797C009C09D0 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		70C18E5A2936797C009C09D0 /* SelektorWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelektorWatch.swift; sourceTree = "<group>"; };
+		70C18E5C2936797C009C09D0 /* SelektorWatch.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = SelektorWatch.intentdefinition; sourceTree = "<group>"; };
+		70C18E5D2936797E009C09D0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		70C18E5F2936797E009C09D0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		70C18E672936865A009C09D0 /* BackgroundTasks.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BackgroundTasks.framework; path = System/Library/Frameworks/BackgroundTasks.framework; sourceTree = SDKROOT; };
+		70C18E6929369742009C09D0 /* Selector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Selector.swift; sourceTree = "<group>"; };
+		70C18E6B2936990E009C09D0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		70C18E6D29369F9C009C09D0 /* Result.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
+		70C18E732936AA82009C09D0 /* SelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectorView.swift; sourceTree = "<group>"; };
+		70C18E752936AAF3009C09D0 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		70C18E772936C770009C09D0 /* Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ext.swift; sourceTree = "<group>"; };
+		70C18E792936DE64009C09D0 /* Duration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Duration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +94,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70C18E682936865A009C09D0 /* BackgroundTasks.framework in Frameworks */,
+				70C18E712936A743009C09D0 /* SwiftMsgpack in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,6 +113,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		70C18E502936797C009C09D0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				70C18E582936797C009C09D0 /* SwiftUI.framework in Frameworks */,
+				70C18E562936797C009C09D0 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -82,6 +131,8 @@
 				70C18E1E293678E9009C09D0 /* Selektor */,
 				70C18E35293678EB009C09D0 /* SelektorTests */,
 				70C18E3F293678EB009C09D0 /* SelektorUITests */,
+				70C18E592936797C009C09D0 /* SelektorWatch */,
+				70C18E542936797C009C09D0 /* Frameworks */,
 				70C18E1D293678E9009C09D0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -92,6 +143,7 @@
 				70C18E1C293678E9009C09D0 /* Selektor.app */,
 				70C18E32293678EB009C09D0 /* SelektorTests.xctest */,
 				70C18E3C293678EB009C09D0 /* SelektorUITests.xctest */,
+				70C18E532936797C009C09D0 /* SelektorWatchExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -106,6 +158,13 @@
 				70C18E2D293678EB009C09D0 /* Info.plist */,
 				70C18E2A293678EB009C09D0 /* Selektor.xcdatamodeld */,
 				70C18E25293678EB009C09D0 /* Preview Content */,
+				70C18E6929369742009C09D0 /* Selector.swift */,
+				70C18E6B2936990E009C09D0 /* AppDelegate.swift */,
+				70C18E6D29369F9C009C09D0 /* Result.swift */,
+				70C18E732936AA82009C09D0 /* SelectorView.swift */,
+				70C18E752936AAF3009C09D0 /* Config.swift */,
+				70C18E772936C770009C09D0 /* Ext.swift */,
+				70C18E792936DE64009C09D0 /* Duration.swift */,
 			);
 			path = Selektor;
 			sourceTree = "<group>";
@@ -135,6 +194,27 @@
 			path = SelektorUITests;
 			sourceTree = "<group>";
 		};
+		70C18E542936797C009C09D0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				70C18E672936865A009C09D0 /* BackgroundTasks.framework */,
+				70C18E552936797C009C09D0 /* WidgetKit.framework */,
+				70C18E572936797C009C09D0 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		70C18E592936797C009C09D0 /* SelektorWatch */ = {
+			isa = PBXGroup;
+			children = (
+				70C18E5A2936797C009C09D0 /* SelektorWatch.swift */,
+				70C18E5C2936797C009C09D0 /* SelektorWatch.intentdefinition */,
+				70C18E5D2936797E009C09D0 /* Assets.xcassets */,
+				70C18E5F2936797E009C09D0 /* Info.plist */,
+			);
+			path = SelektorWatch;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -149,8 +229,12 @@
 			buildRules = (
 			);
 			dependencies = (
+				70C18E6629367D11009C09D0 /* PBXTargetDependency */,
 			);
 			name = Selektor;
+			packageProductDependencies = (
+				70C18E702936A743009C09D0 /* SwiftMsgpack */,
+			);
 			productName = Selektor;
 			productReference = 70C18E1C293678E9009C09D0 /* Selektor.app */;
 			productType = "com.apple.product-type.application";
@@ -191,6 +275,23 @@
 			productReference = 70C18E3C293678EB009C09D0 /* SelektorUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		70C18E522936797C009C09D0 /* SelektorWatchExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 70C18E612936797E009C09D0 /* Build configuration list for PBXNativeTarget "SelektorWatchExtension" */;
+			buildPhases = (
+				70C18E4F2936797C009C09D0 /* Sources */,
+				70C18E502936797C009C09D0 /* Frameworks */,
+				70C18E512936797C009C09D0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SelektorWatchExtension;
+			productName = SelektorWatchExtension;
+			productReference = 70C18E532936797C009C09D0 /* SelektorWatchExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -212,6 +313,9 @@
 						CreatedOnToolsVersion = 14.0.1;
 						TestTargetID = 70C18E1B293678E9009C09D0;
 					};
+					70C18E522936797C009C09D0 = {
+						CreatedOnToolsVersion = 14.0.1;
+					};
 				};
 			};
 			buildConfigurationList = 70C18E17293678E9009C09D0 /* Build configuration list for PBXProject "Selektor" */;
@@ -223,6 +327,9 @@
 				Base,
 			);
 			mainGroup = 70C18E13293678E9009C09D0;
+			packageReferences = (
+				70C18E6F2936A743009C09D0 /* XCRemoteSwiftPackageReference "swift-msgpack" */,
+			);
 			productRefGroup = 70C18E1D293678E9009C09D0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -230,6 +337,7 @@
 				70C18E1B293678E9009C09D0 /* Selektor */,
 				70C18E31293678EB009C09D0 /* SelektorTests */,
 				70C18E3B293678EB009C09D0 /* SelektorUITests */,
+				70C18E522936797C009C09D0 /* SelektorWatchExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -239,6 +347,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70C18E6429367CB6009C09D0 /* SelektorWatchExtension.appex in Resources */,
 				70C18E27293678EB009C09D0 /* Preview Assets.xcassets in Resources */,
 				70C18E24293678EB009C09D0 /* Assets.xcassets in Resources */,
 			);
@@ -258,6 +367,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		70C18E512936797C009C09D0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				70C18E5E2936797E009C09D0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -265,10 +382,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70C18E6C2936990E009C09D0 /* AppDelegate.swift in Sources */,
+				70C18E7A2936DE64009C09D0 /* Duration.swift in Sources */,
+				70C18E742936AA83009C09D0 /* SelectorView.swift in Sources */,
+				70C18E762936AAF3009C09D0 /* Config.swift in Sources */,
 				70C18E29293678EB009C09D0 /* Persistence.swift in Sources */,
 				70C18E22293678E9009C09D0 /* ContentView.swift in Sources */,
+				70C18E6A29369742009C09D0 /* Selector.swift in Sources */,
+				70C18E6E29369F9C009C09D0 /* Result.swift in Sources */,
 				70C18E2C293678EB009C09D0 /* Selektor.xcdatamodeld in Sources */,
 				70C18E20293678E9009C09D0 /* SelektorApp.swift in Sources */,
+				70C18E782936C770009C09D0 /* Ext.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,6 +400,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70C18E722936A7AB009C09D0 /* Result.swift in Sources */,
 				70C18E37293678EB009C09D0 /* SelektorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -286,6 +411,15 @@
 			files = (
 				70C18E43293678EB009C09D0 /* SelektorUITestsLaunchTests.swift in Sources */,
 				70C18E41293678EB009C09D0 /* SelektorUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		70C18E4F2936797C009C09D0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				70C18E5B2936797C009C09D0 /* SelektorWatch.swift in Sources */,
+				70C18E602936797E009C09D0 /* SelektorWatch.intentdefinition in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,6 +435,11 @@
 			isa = PBXTargetDependency;
 			target = 70C18E1B293678E9009C09D0 /* Selektor */;
 			targetProxy = 70C18E3D293678EB009C09D0 /* PBXContainerItemProxy */;
+		};
+		70C18E6629367D11009C09D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 70C18E522936797C009C09D0 /* SelektorWatchExtension */;
+			targetProxy = 70C18E6529367D11009C09D0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -430,6 +569,7 @@
 				DEVELOPMENT_TEAM = 3W2S6XUTR8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Selektor/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -459,6 +599,7 @@
 				DEVELOPMENT_TEAM = 3W2S6XUTR8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Selektor/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -553,6 +694,66 @@
 			};
 			name = Release;
 		};
+		70C18E622936797E009C09D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3W2S6XUTR8;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SelektorWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SelektorWatch;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.SelektorWatch;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Debug;
+		};
+		70C18E632936797E009C09D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3W2S6XUTR8;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SelektorWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SelektorWatch;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.SelektorWatch;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -592,7 +793,35 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		70C18E612936797E009C09D0 /* Build configuration list for PBXNativeTarget "SelektorWatchExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				70C18E622936797E009C09D0 /* Debug */,
+				70C18E632936797E009C09D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		70C18E6F2936A743009C09D0 /* XCRemoteSwiftPackageReference "swift-msgpack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nnabeyang/swift-msgpack";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		70C18E702936A743009C09D0 /* SwiftMsgpack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 70C18E6F2936A743009C09D0 /* XCRemoteSwiftPackageReference "swift-msgpack" */;
+			productName = SwiftMsgpack;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		70C18E2A293678EB009C09D0 /* Selektor.xcdatamodeld */ = {

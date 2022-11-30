@@ -7,6 +7,7 @@
 
 import XCTest
 @testable import Selektor
+import SwiftMsgpack
 
 final class SelektorTests: XCTestCase {
 
@@ -30,6 +31,23 @@ final class SelektorTests: XCTestCase {
         // This is an example of a performance test case.
         self.measure {
             // Put the code you want to measure the time of here.
+        }
+    }
+    
+    func testEncodeResult() throws {
+        let results: [Result] = [
+            .IntegerResult(integer: 42),
+            .FloatResult(float: 3.14159),
+            .PercentResult(value: 50),
+            .StringResult(string: "test"),
+            .ImageResult(imageData: "abc".data(using: .utf8)!)
+        ]
+        try results.forEach { result in
+            let encoder = MsgPackEncoder()
+            let encoded = try encoder.encode(result)
+            let decoder = MsgPackDecoder()
+            let decoded = try decoder.decode(Result.self, from: encoded)
+            XCTAssertEqual(result, decoded)
         }
     }
 

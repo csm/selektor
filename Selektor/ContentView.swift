@@ -12,21 +12,22 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Config.index, ascending: true)],
         animation: .default)
-    private var items: FetchedResults<Item>
+    private var configs: FetchedResults<Config>
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(items) { item in
+                ForEach(configs) { config in
                     NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
+                        SelectorView(config: config).environment(\.managedObjectContext, viewContext)
                     } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+                        Text(config.name!)
                     }
                 }
                 .onDelete(perform: deleteItems)
+                .onMove(perform: moveItems)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -34,7 +35,7 @@ struct ContentView: View {
                 }
                 ToolbarItem {
                     Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                        Label("New", systemImage: "plus")
                     }
                 }
             }
@@ -44,9 +45,11 @@ struct ContentView: View {
 
     private func addItem() {
         withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+            let newItem = Config(context: viewContext)
+            newItem.index = (configs.map(\.index).max() ?? 0) + 1
 
+            NavigationLink(destination: SelectorView(config: newItem)) { EmptyView() }
+            
             do {
                 try viewContext.save()
             } catch {
@@ -57,10 +60,14 @@ struct ContentView: View {
             }
         }
     }
+    
+    private func moveItems(_ from: IndexSet, _ to: Int) {
+        print("TODO: handle moveItems from: \(from) to: \(to)")
+    }
 
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
+            offsets.map { configs[$0] }.forEach(viewContext.delete)
 
             do {
                 try viewContext.save()
@@ -73,13 +80,6 @@ struct ContentView: View {
         }
     }
 }
-
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
