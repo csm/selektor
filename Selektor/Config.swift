@@ -9,28 +9,6 @@ import Foundation
 import SwiftMsgpack
 
 extension Config {
-    var selector: Selector? {
-        get {
-            let decoder = MsgPackDecoder()
-            if let config = self.selectorConfig {
-                do {
-                    return try decoder.decode(Selector.self, from: config)
-                } catch {
-                    return nil
-                }
-            }
-            return nil
-        }
-        set {
-            let encoder = MsgPackEncoder()
-            do {
-                self.selectorConfig = try encoder.encode(newValue)
-            } catch {
-                self.selectorConfig = nil
-            }
-        }
-    }
-    
     var result: Result? {
         get {
             let decoder = MsgPackDecoder()

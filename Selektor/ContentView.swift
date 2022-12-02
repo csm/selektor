@@ -17,17 +17,16 @@ struct ContentView: View {
     private var configs: FetchedResults<Config>
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 ForEach(configs) { config in
-                    NavigationLink {
-                        SelectorView(config: config).environment(\.managedObjectContext, viewContext)
-                    } label: {
-                        Text(config.name ?? "")
-                    }
+                    NavigationLink(config.name ?? "", value: config)
                 }
                 .onDelete(perform: deleteItems)
                 .onMove(perform: moveItems)
+            }
+            .navigationDestination(for: Config.self) { config in
+                SelectorView(config: config)
             }
             .listStyle(.grouped)
             .toolbar {
@@ -40,21 +39,20 @@ struct ContentView: View {
                     }
                 }
             }
-            Text("Select an item")
+            Text("Selektor")
         }
     }
 
     private func addItem() {
         let newItem = Config(context: viewContext)
-        newItem.index = (configs.map(\.index).max() ?? 0) + 1
+        newItem.index = (configs.map(\.index).max() ?? -1) + 1
         newItem.name = "New Config"
         var i = 1
         while configs.first(where: { c in c.name == newItem.name }) != nil {
             i += 1
             newItem.name = "New Config \(i)"
         }
-        NavigationLink(destination: SelectorView(config: newItem)) { EmptyView() }
-            
+
             /*do {
                 try viewContext.save()
             } catch {
@@ -66,7 +64,19 @@ struct ContentView: View {
     }
     
     private func moveItems(_ from: IndexSet, _ to: Int) {
-        print("TODO: handle moveItems from: \(from) to: \(to)")
+        let fromIndex = from.first!
+        configs.forEach { config in
+            if (config.index == fromIndex) {
+                config.index = Int32(to)
+            } else if (config.index >= to) {
+                config.index += 1
+            }
+        }
+        do {
+            try viewContext.save()
+        } catch {
+            print("error saving \(error)")
+        }
     }
 
     private func deleteItems(offsets: IndexSet) {

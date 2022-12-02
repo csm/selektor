@@ -4,11 +4,12 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>org.metastatic.refresh</string>
+		<string>org.metastatic.selektor.refresh</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
+		<string>processing</string>
 	</array>
 </dict>
 </plist>

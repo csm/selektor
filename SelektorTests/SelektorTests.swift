@@ -8,6 +8,8 @@
 import XCTest
 @testable import Selektor
 import SwiftMsgpack
+import Erik
+import WebKit
 
 final class SelektorTests: XCTestCase {
 
@@ -51,4 +53,21 @@ final class SelektorTests: XCTestCase {
         }
     }
 
+    /*
+    func testWebkitQuerySelector() async throws {
+        let _ = WKWebViewConfiguration()
+        let document = try await withCheckedThrowingContinuation {
+            continuation in
+            Erik.visit(url: URL(string: "https://www.duckduckgo.com")!) { result, error in
+                if let result = result {
+                    continuation.resume(returning: result)
+                } else {
+                    continuation.resume(throwing: error!)
+                }
+            }
+        }
+        let selected = document.querySelectorAll(".badge-link__title")
+        print("selected: \(selected)")
+    }
+     */
 }

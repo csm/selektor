@@ -32,6 +32,14 @@
 		70C18E762936AAF3009C09D0 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E752936AAF3009C09D0 /* Config.swift */; };
 		70C18E782936C770009C09D0 /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E772936C770009C09D0 /* Ext.swift */; };
 		70C18E7A2936DE64009C09D0 /* Duration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E792936DE64009C09D0 /* Duration.swift */; };
+		70E20EB829371E5300F2B2B3 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20EB729371E5300F2B2B3 /* WebView.swift */; };
+		70E20EBB2937314000F2B2B3 /* Erik in Frameworks */ = {isa = PBXBuildFile; productRef = 70E20EBA2937314000F2B2B3 /* Erik */; };
+		70E20EBD2937EA9A00F2B2B3 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70E20EBC2937EA9A00F2B2B3 /* WebKit.framework */; };
+		70E20EBF2937EABB00F2B2B3 /* Erik in Frameworks */ = {isa = PBXBuildFile; productRef = 70E20EBE2937EABB00F2B2B3 /* Erik */; };
+		70E20EC12937EAC900F2B2B3 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70E20EC02937EAC800F2B2B3 /* WebKit.framework */; };
+		70E20EC329392D8200F2B2B3 /* UITextViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20EC229392D8200F2B2B3 /* UITextViewWrapper.swift */; };
+		70E20EC52939326200F2B2B3 /* MultilineTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20EC42939326200F2B2B3 /* MultilineTextField.swift */; };
+		70E20EC72939376500F2B2B3 /* ValueSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20EC62939376500F2B2B3 /* ValueSelector.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +95,12 @@
 		70C18E752936AAF3009C09D0 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		70C18E772936C770009C09D0 /* Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ext.swift; sourceTree = "<group>"; };
 		70C18E792936DE64009C09D0 /* Duration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Duration.swift; sourceTree = "<group>"; };
+		70E20EB729371E5300F2B2B3 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		70E20EBC2937EA9A00F2B2B3 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		70E20EC02937EAC800F2B2B3 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk/System/iOSSupport/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
+		70E20EC229392D8200F2B2B3 /* UITextViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITextViewWrapper.swift; sourceTree = "<group>"; };
+		70E20EC42939326200F2B2B3 /* MultilineTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultilineTextField.swift; sourceTree = "<group>"; };
+		70E20EC62939376500F2B2B3 /* ValueSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueSelector.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,7 +108,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70E20EBD2937EA9A00F2B2B3 /* WebKit.framework in Frameworks */,
 				70C18E682936865A009C09D0 /* BackgroundTasks.framework in Frameworks */,
+				70E20EBB2937314000F2B2B3 /* Erik in Frameworks */,
 				70C18E712936A743009C09D0 /* SwiftMsgpack in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -103,6 +119,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70E20EC12937EAC900F2B2B3 /* WebKit.framework in Frameworks */,
+				70E20EBF2937EABB00F2B2B3 /* Erik in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,6 +183,10 @@
 				70C18E752936AAF3009C09D0 /* Config.swift */,
 				70C18E772936C770009C09D0 /* Ext.swift */,
 				70C18E792936DE64009C09D0 /* Duration.swift */,
+				70E20EB729371E5300F2B2B3 /* WebView.swift */,
+				70E20EC229392D8200F2B2B3 /* UITextViewWrapper.swift */,
+				70E20EC42939326200F2B2B3 /* MultilineTextField.swift */,
+				70E20EC62939376500F2B2B3 /* ValueSelector.swift */,
 			);
 			path = Selektor;
 			sourceTree = "<group>";
@@ -197,6 +219,8 @@
 		70C18E542936797C009C09D0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				70E20EBC2937EA9A00F2B2B3 /* WebKit.framework */,
+				70E20EC02937EAC800F2B2B3 /* WebKit.framework */,
 				70C18E672936865A009C09D0 /* BackgroundTasks.framework */,
 				70C18E552936797C009C09D0 /* WidgetKit.framework */,
 				70C18E572936797C009C09D0 /* SwiftUI.framework */,
@@ -234,6 +258,7 @@
 			name = Selektor;
 			packageProductDependencies = (
 				70C18E702936A743009C09D0 /* SwiftMsgpack */,
+				70E20EBA2937314000F2B2B3 /* Erik */,
 			);
 			productName = Selektor;
 			productReference = 70C18E1C293678E9009C09D0 /* Selektor.app */;
@@ -253,6 +278,9 @@
 				70C18E34293678EB009C09D0 /* PBXTargetDependency */,
 			);
 			name = SelektorTests;
+			packageProductDependencies = (
+				70E20EBE2937EABB00F2B2B3 /* Erik */,
+			);
 			productName = SelektorTests;
 			productReference = 70C18E32293678EB009C09D0 /* SelektorTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -329,6 +357,8 @@
 			mainGroup = 70C18E13293678E9009C09D0;
 			packageReferences = (
 				70C18E6F2936A743009C09D0 /* XCRemoteSwiftPackageReference "swift-msgpack" */,
+				70E20EB92937314000F2B2B3 /* XCRemoteSwiftPackageReference "Erik" */,
+				70E20EC8293951CE00F2B2B3 /* XCRemoteSwiftPackageReference "WKZombie" */,
 			);
 			productRefGroup = 70C18E1D293678E9009C09D0 /* Products */;
 			projectDirPath = "";
@@ -383,7 +413,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				70C18E6C2936990E009C09D0 /* AppDelegate.swift in Sources */,
+				70E20EC329392D8200F2B2B3 /* UITextViewWrapper.swift in Sources */,
 				70C18E7A2936DE64009C09D0 /* Duration.swift in Sources */,
+				70E20EC72939376500F2B2B3 /* ValueSelector.swift in Sources */,
+				70E20EC52939326200F2B2B3 /* MultilineTextField.swift in Sources */,
 				70C18E742936AA83009C09D0 /* SelectorView.swift in Sources */,
 				70C18E762936AAF3009C09D0 /* Config.swift in Sources */,
 				70C18E29293678EB009C09D0 /* Persistence.swift in Sources */,
@@ -391,6 +424,7 @@
 				70C18E6A29369742009C09D0 /* Selector.swift in Sources */,
 				70C18E6E29369F9C009C09D0 /* Result.swift in Sources */,
 				70C18E2C293678EB009C09D0 /* Selektor.xcdatamodeld in Sources */,
+				70E20EB829371E5300F2B2B3 /* WebView.swift in Sources */,
 				70C18E20293678E9009C09D0 /* SelektorApp.swift in Sources */,
 				70C18E782936C770009C09D0 /* Ext.swift in Sources */,
 			);
@@ -570,6 +604,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Selektor/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Embedded web views may request camera.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Embedded web views may request microphone.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -600,6 +636,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Selektor/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Embedded web views may request camera.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Embedded web views may request microphone.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -813,6 +851,22 @@
 				minimumVersion = 0.2.1;
 			};
 		};
+		70E20EB92937314000F2B2B3 /* XCRemoteSwiftPackageReference "Erik" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/phimage/Erik";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+		70E20EC8293951CE00F2B2B3 /* XCRemoteSwiftPackageReference "WKZombie" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mkoehnke/WKZombie";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -820,6 +874,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 70C18E6F2936A743009C09D0 /* XCRemoteSwiftPackageReference "swift-msgpack" */;
 			productName = SwiftMsgpack;
+		};
+		70E20EBA2937314000F2B2B3 /* Erik */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 70E20EB92937314000F2B2B3 /* XCRemoteSwiftPackageReference "Erik" */;
+			productName = Erik;
+		};
+		70E20EBE2937EABB00F2B2B3 /* Erik */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 70E20EB92937314000F2B2B3 /* XCRemoteSwiftPackageReference "Erik" */;
+			productName = Erik;
 		};
 /* End XCSwiftPackageProductDependency section */
 
