@@ -47,6 +47,7 @@ struct ContentView: View {
         let newItem = Config(context: viewContext)
         newItem.index = (configs.map(\.index).max() ?? -1) + 1
         newItem.name = "New Config"
+        newItem.id = UUID()
         var i = 1
         while configs.first(where: { c in c.name == newItem.name }) != nil {
             i += 1

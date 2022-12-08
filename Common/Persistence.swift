@@ -17,6 +17,7 @@ struct PersistenceController {
             let newConfig = Config(context: viewContext)
             newConfig.name = "Config \(i)"
             newConfig.index = Int32(i + 1)
+            newConfig.id = UUID()
         }
         do {
             try viewContext.save()
@@ -52,6 +53,6 @@ struct PersistenceController {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         })
-        //container.viewContext.automaticallyMergesChangesFromParent = true
+        container.viewContext.automaticallyMergesChangesFromParent = true
     }
 }

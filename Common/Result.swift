@@ -50,6 +50,18 @@ enum Result : Codable, Equatable {
     case PercentResult(value: Float)
     case StringResult(string: String)
     case ImageResult(imageData: Data)
+    
+    
+    func description() -> String {
+        switch self {
+        case let .StringResult(string: s): return s
+        case let .IntegerResult(integer: i): return "\(i)"
+        case let .FloatResult(float: f): return "\(f)"
+        case let .PercentResult(value: p): return "\(p * 100)%"
+        default: return "\(self)"
+        }
+    }
+
 }
 
 extension Result {

@@ -15,24 +15,26 @@ struct SelectorView: View {
     @ObservedObject var config: Config
     
     @State var name: String = ""
-    @State var url: String = "" {
-        didSet { onChange() }
-    }
+    @State var url: String = ""
     @State var intervalNumber: String = "1"
-    @State var intervalUnits: TimeUnit = .Hours
+    @State var intervalUnits: TimeUnit = .Days
     @State var selectors: String = ""
-    @State var resultIndex: String = "1" {
-        didSet { onChange() }
-    }
-    @State var decodeAs: ResultType = .String {
-        didSet { onChange() }
-    }
+    @State var resultIndex: String = "1"
+    @State var decodeAs: ResultType = .String
     @State var lastResult: Result? = Result.StringResult(string: "")
     @State var resultPreview: String = ""
     @State var lastError: Error? = nil
     @State var showAlert: Bool = false
     @State var errorText: String = ""
-    
+    @State var isWidget: Bool = false
+    @State var wasUpdated: Bool = false
+    @State var isDownloaded: Bool = false
+    static let downloadPath = {
+        let userDir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
+        let userDirUrl = URL(fileURLWithPath: userDir)
+        return userDirUrl.appendingPathComponent("selektor-data.html")
+    }()
+
     var body: some View {
         List {
             TextField("Name", text: $name).textInputAutocapitalization(.words)
@@ -40,17 +42,30 @@ struct SelectorView: View {
                 Text("URL").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
                 HStack {
                     Text("https://").foregroundColor(.gray)
-                    TextField("URL", text: $url).keyboardType(.URL).autocorrectionDisabled(true).textInputAutocapitalization(.never)
+                    TextField("URL", text: $url)
+                        .keyboardType(.URL)
+                        .autocorrectionDisabled(true)
+                        .textInputAutocapitalization(.never)
+                        .onSubmit {
+                            if url.starts(with: "https://") {
+                                url = String(url.dropFirst(8))
+                            }
+                            onUrlChange()
+                        }
                 }
             }
             VStack(alignment: .leading) {
                 Text("Refresh Interval").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
                 HStack {
-                    TextField("Frequency", text: $intervalNumber).keyboardType(.numberPad).autocorrectionDisabled(true)
+                    TextField("Frequency", text: $intervalNumber)
+                        .keyboardType(.numberPad)
+                        .autocorrectionDisabled(true)
+                        .onSubmit { onChange() }
                     Picker("", selection: $intervalUnits) {
                         Text("Seconds").tag(TimeUnit.Seconds)
                         Text("Minutes").tag(TimeUnit.Minutes)
                         Text("Hours").tag(TimeUnit.Hours)
+                        Text("Days").tag(TimeUnit.Days)
                     }
                 }
             }
@@ -64,7 +79,12 @@ struct SelectorView: View {
             HStack {
                 Text("Result Number").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
                 Spacer()
-                TextField("Result", text: $resultIndex).keyboardType(.numberPad).frame(width: 42)
+                TextField("Result", text: $resultIndex)
+                    .keyboardType(.numberPad)
+                    .frame(width: 42, alignment: .trailing)
+                    .onSubmit {
+                        onChange()
+                    }
             }
             HStack {
                 Text("Decode As").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
@@ -74,8 +94,11 @@ struct SelectorView: View {
                     Text("Number").tag(ResultType.Float)
                     Text("Percent").tag(ResultType.Percent)
                     //Text("Image").tag(ResultType.Image)
+                }.onSubmit {
+                    onChange()
                 }
             }
+            Toggle("Show In Widget", isOn: $isWidget).toggleStyle(.switch)
             VStack(alignment: .leading) {
                 Text("Result").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
                 HStack {
@@ -93,6 +116,10 @@ struct SelectorView: View {
                     }.tint(errorForeground())
                 }
             }
+            NavigationLink("Result History", value: self.config.id)
+        }
+        .navigationDestination(for: UUID.self) { id in
+            HistoryView(id: id)
         }
         .alert(errorText, isPresented: $showAlert) {
             Button("OK") {}
@@ -100,6 +127,7 @@ struct SelectorView: View {
         .environment(\.defaultMinListRowHeight, 2)
         .listStyle(.grouped)
         .onAppear {
+            isDownloaded = false
             if let v = self.config.name {
                 self.name = v
             }
@@ -113,7 +141,11 @@ struct SelectorView: View {
                 }
                 self.url = s
             }
-            self.intervalNumber = "\(config.triggerInterval)"
+            if config.triggerInterval <= 0 {
+                self.intervalNumber = "1"
+            } else {
+                self.intervalNumber = "\(config.triggerInterval)"
+            }
             if let v = self.config.triggerIntervalUnits {
                 self.intervalUnits = TimeUnit.forTag(tag: v)
             }
@@ -122,6 +154,7 @@ struct SelectorView: View {
             }
             self.resultIndex = "\(self.config.elementIndex + 1)"
             self.decodeAs = ResultType.from(tag: config.resultType ?? "s") ?? ResultType.String
+            self.isWidget = self.config.isWidget
             onChange()
         }
         .onDisappear {
@@ -132,50 +165,98 @@ struct SelectorView: View {
             config.selector = self.selectors
             config.elementIndex = (Int32(resultIndex) ?? 1) - 1
             config.resultType = decodeAs.tag()
+            config.isWidget = self.isWidget
+            if wasUpdated {
+                config.result = lastResult
+                config.lastError = lastError?.localizedDescription
+                let newHistory = History(context: viewContext)
+                newHistory.configId = config.id
+                newHistory.id = UUID()
+                newHistory.date = Date()
+                newHistory.result = lastResult
+                newHistory.error = lastError?.localizedDescription
+            }
             do {
                 try viewContext.save()
             } catch {
                 print("failed to save! \(error)")
             }
+            if wasUpdated {
+                let historyRequest = NSFetchRequest<History>(entityName: "History")
+                historyRequest.predicate = NSPredicate(format: "configId = %@", argumentArray: [config.id!])
+                historyRequest.sortDescriptors = [NSSortDescriptor(keyPath: \History.date, ascending: true)]
+                do {
+                    let history = try viewContext.fetch(historyRequest)
+                    if history.count > 20 {
+                        history.dropLast(20).forEach { e in
+                            viewContext.delete(e)
+                        }
+                        try viewContext.save()
+                    }
+                } catch {
+                    print("couldn't update history! \(error)")
+                }
+            }
+            Scheduler.shared.scheduleConfigs()
+        }
+    }
+    
+    func onUrlChange() {
+        DispatchQueue.global(qos: .background).async {
+            if let u = URL(string: "https://\(url)"), let i = Int(resultIndex), !selectors.isEmpty {
+                var request = URLRequest(url: u, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20.0)
+                request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
+                request.setValue("en", forHTTPHeaderField: "Accept-Language")
+                request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
+                URLSession.shared.downloadTask(with: request) { location, response, error in
+                    if let e = error {
+                        lastResult = nil
+                        lastError = e
+                        resultPreview = ""
+                    } else if let r = response as? HTTPURLResponse, let loc = location {
+                        switch r.statusCode {
+                        case 200:
+                            isDownloaded = true
+                            do {
+                                try FileManager.default.copyItem(atPath: loc.absoluteString, toPath: SelectorView.downloadPath.absoluteString)
+                                onChange()
+                            } catch {
+                                lastResult = nil
+                                lastError = error
+                                resultPreview = ""
+                            }
+                        default:
+                            lastResult = nil
+                            lastError = ValueSelectorError.HTTPError(statusCode: r.statusCode)
+                            resultPreview = ""
+                        }
+                    }
+                }
+                ValueSelector.shared.fetchValue(url: u, selector: selectors, resultIndex: i, resultType: decodeAs) { result, error in
+                    lastResult = result
+                    lastError = error
+                    resultPreview = result?.description() ?? ""
+                    wasUpdated = true
+                }
+            }
         }
     }
     
     func onChange() {
-        DispatchQueue.global(qos: .background).async {
-            if let u = URL(string: "https://\(url)"), let i = Int(resultIndex), !selectors.isEmpty {
-                ValueSelector.shared.fetchValue(url: u, selector: selectors, resultIndex: i-1, resultType: decodeAs) { r, e in
-                    print("fetched \(r) - \(e)")
-                    lastResult = r
-                    lastError = e
-                    if let res = r {
-                        switch res {
-                        case let .StringResult(s): resultPreview = s
-                        case let .FloatResult(f): resultPreview = "\(f)"
-                        case let .PercentResult(p): resultPreview = "\(p * 100)%"
-                        default: resultPreview = ""
-                        }
-                        lastError = nil
-                    } else {
-                        resultPreview = ""
-                        if let err = e {
-                            switch err {
-                            case let ValueSelectorError.HTTPError(statusCode):
-                                errorText = "Received HTTP code \(statusCode)"
-                            case let ValueSelectorError.DecodeIntError(t):
-                                errorText = "Could not read \"\(t)\" as an integer."
-                            case let ValueSelectorError.DecodeIntError(t):
-                                errorText = "Could not read \"\(t)\" as a number."
-                            case let ValueSelectorError.DecodePercentError(t):
-                                errorText = "Could not read \"\(t)\" as a percentage."
-                            default:
-                                errorText = "\(err.localizedDescription)."
-                            }
-                        } else {
-                            errorText = "Nothing matched your selector."
-                        }
-                    }
+        if isDownloaded {
+            if let s = selectors.notBlank(), let i = Int(resultIndex) {
+                do {
+                    lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i, resultType: decodeAs)
+                    lastError = nil
+                    resultPreview = lastResult?.description() ?? ""
+                } catch {
+                    lastResult = nil
+                    lastError = error
+                    resultPreview = ""
                 }
             }
+        } else {
+            onUrlChange()
         }
     }
     

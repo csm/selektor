@@ -35,6 +35,16 @@
 			<key>orderHint</key>
 			<integer>2</integer>
 		</dict>
+		<key>SelektorWidgetExtension.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
+		<key>SelektorWidgetsExtension.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
+		</dict>
 	</dict>
 </dict>
 </plist>

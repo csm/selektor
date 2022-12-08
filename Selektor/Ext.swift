@@ -73,3 +73,12 @@ extension WKWebView {
         }
     }
 }
+
+extension String {
+    func notBlank() -> String? {
+        if self.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return nil
+        }
+        return self
+    }
+}

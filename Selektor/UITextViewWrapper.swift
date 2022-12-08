@@ -49,6 +49,9 @@ struct UITextViewWrapper: UIViewRepresentable {
         textField.isSelectable = true
         textField.isScrollEnabled = false
         textField.backgroundColor = UIColor.clear
+        textField.keyboardType = .asciiCapable
+        textField.autocorrectionType = .no
+        textField.autocapitalizationType = .none
         if nil != onDone {
             textField.returnKeyType = .done
         }

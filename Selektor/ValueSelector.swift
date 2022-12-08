@@ -7,58 +7,81 @@
 
 import Foundation
 import Kanna
+import CoreData
 
 enum ValueSelectorError: Error {
     case HTTPError(statusCode: Int)
     case DecodeIntError(text: String)
     case DecodeFloatError(text: String)
     case DecodePercentError(text: String)
+    case TimeoutError
+    
+    var localizedDescription: String {
+        switch self {
+        case let .HTTPError(statusCode: c): return "Request returned error \(c)"
+        case let .DecodeIntError(text: t): return "Could not read \"\(t)\" as an integer."
+        case let .DecodeFloatError(text: t): return "Could not read \"\(t)\" as a number."
+        case let .DecodePercentError(text: t): return "Could not read \"\(t)\" as a percentage."
+        case .TimeoutError: return "The request timed out."
+        }
+    }
+}
+
+protocol ValueSelectorDelegate {
+    func fetch(withId: UUID, didCompleteWithResult: Result?)
+    func fetch(withId: UUID, didFailWithError: Error)
 }
 
 class ValueSelector {
     static let shared = ValueSelector()
-
     let session: URLSession
     
     init() {
-        session = URLSession(configuration: URLSessionConfiguration.default)
+        session = URLSession(configuration: .default)
     }
     
-    func fetchValue(url: URL, selector: String, resultIndex: Int, resultType: ResultType, onFetch: @escaping (Result?, Error?) -> Void) {
+    func fetchValue(url: URL, selector: String, resultIndex: Int, resultType: ResultType, onComplete: @escaping (Result?, Error?) -> Void) {
         print("fetching \(url) with selector \(selector) resultIndex: \(resultIndex)")
-        let task = session.dataTask(with: url) { data, response, error in
-            print("fetched \(data) \(response) \(error)")
-            if let e = error {
-                onFetch(nil, e)
-            } else if let r = response as? HTTPURLResponse {
-                switch r.statusCode {
+        var request = URLRequest(url: url, timeoutInterval: 20.0)
+        request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
+        request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
+        request.setValue("en", forHTTPHeaderField: "Accept-Language")
+        let task = session.downloadTask(with: request) { location, response, error in
+            if error != nil {
+                print("fetch returned error: \(error)")
+                onComplete(nil, error)
+            } else if let resp = response as? HTTPURLResponse, let u = location {
+                switch resp.statusCode {
                 case 200:
-                    if let d = data, let html = String(data: d, encoding: .utf8) {
-                        do {
-                            let doc = try HTML(html: html, encoding: .utf8)
-                            let path = doc.css(selector, namespaces: nil)
-                            if path.count > resultIndex {
-                                let value = path[resultIndex]
-                                do {
-                                    onFetch(try self.decodeResult(node: value, resultType: resultType), nil)
-                                } catch {
-                                    onFetch(nil, error)
-                                }
-                            } else {
-                                onFetch(nil, nil)
-                            }
-                        } catch {
-                            onFetch(nil, error)
-                        }
-                    } else {
-                        onFetch(nil, nil)
+                    do {
+                        print("read data into URL: \(u)")
+                        let result = try ValueSelector.applySelector(location: u, selector: selector, resultIndex: resultIndex, resultType: resultType)
+                        print("decoded \(result)")
+                        onComplete(result, nil)
+                    } catch {
+                        print("error decoding \(error)")
+                        onComplete(nil, error)
                     }
                 default:
-                    onFetch(nil, ValueSelectorError.HTTPError(statusCode: r.statusCode))
+                    onComplete(nil, ValueSelectorError.HTTPError(statusCode: resp.statusCode))
                 }
+            } else {
+                print("not an HTTP response? no url? \(response) \(location)")
+                onComplete(nil, nil)
             }
         }
         task.resume()
+    }
+    
+    static func applySelector(location: URL, selector: String, resultIndex: Int, resultType: ResultType) throws -> Result? {
+        let doc = try HTML(url: location, encoding: .utf8)
+        let path = doc.css(selector, namespaces: nil)
+        if path.count > resultIndex {
+            let value = path[resultIndex]
+            return try decodeResult(node: value, resultType: resultType)
+        } else {
+            return nil
+        }
     }
     
     static func decodePercent(value: String?) throws -> Float? {
@@ -73,7 +96,7 @@ class ValueSelector {
         throw ValueSelectorError.DecodePercentError(text: value ?? "")
     }
     
-    func decodeResult(node: XMLElement, resultType: ResultType) throws -> Result? {
+    static func decodeResult(node: XMLElement, resultType: ResultType) throws -> Result? {
         let h = node.innerHTML?.trimmingCharacters(in: .whitespacesAndNewlines)
         switch resultType {
         case .Integer:
