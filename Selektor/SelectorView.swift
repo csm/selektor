@@ -34,6 +34,17 @@ struct SelectorView: View {
         let userDirUrl = URL(fileURLWithPath: userDir)
         return userDirUrl.appendingPathComponent("selektor-data.html")
     }()
+    
+    let webView = {
+        let pagePreferences = WKWebpagePreferences()
+        pagePreferences.allowsContentJavaScript = false
+        let preferences = WKPreferences()
+        preferences.isTextInteractionEnabled = false
+        let configuration = WKWebViewConfiguration()
+        configuration.preferences = preferences
+        configuration.defaultWebpagePreferences = pagePreferences
+        return WKWebView(frame: CGRect(x: 0, y: 0, width: 200, height: 200), configuration: configuration)
+    }()
 
     var body: some View {
         List {
@@ -116,6 +127,13 @@ struct SelectorView: View {
                     }.tint(errorForeground())
                 }
             }
+            if isDownloaded {
+                WebView(webView: webView)
+                    .frame(width: 200)
+                    .aspectRatio(0.75, contentMode: .fill)
+            } else {
+                EmptyView()
+            }
             NavigationLink("Result History", value: self.config.id)
         }
         .navigationDestination(for: UUID.self) { id in
@@ -155,7 +173,7 @@ struct SelectorView: View {
             self.resultIndex = "\(self.config.elementIndex + 1)"
             self.decodeAs = ResultType.from(tag: config.resultType ?? "s") ?? ResultType.String
             self.isWidget = self.config.isWidget
-            onChange()
+            onUrlChange()
         }
         .onDisappear {
             config.name = self.name
@@ -219,6 +237,9 @@ struct SelectorView: View {
                             isDownloaded = true
                             do {
                                 try FileManager.default.copyItem(atPath: loc.absoluteString, toPath: SelectorView.downloadPath.absoluteString)
+                                DispatchQueue.main.async {
+                                    webView.loadFileURL(SelectorView.downloadPath, allowingReadAccessTo: SelectorView.downloadPath)
+                                }
                                 onChange()
                             } catch {
                                 lastResult = nil

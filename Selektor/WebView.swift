@@ -27,6 +27,10 @@ struct WebView: UIViewRepresentable {
         }
     }
     
+    init(webView: WKWebView) {
+        self.webView = webView
+    }
+    
     init() {
         let pagePreferences = WKWebpagePreferences()
         pagePreferences.allowsContentJavaScript = false
@@ -35,7 +39,7 @@ struct WebView: UIViewRepresentable {
         let configuration = WKWebViewConfiguration()
         configuration.preferences = preferences
         configuration.defaultWebpagePreferences = pagePreferences
-        webView = WKWebView(frame: .zero, configuration: configuration)
+webView = WKWebView(frame: .zero, configuration: configuration)
         webView.pageZoom = 0.05
     }
     
