@@ -39,7 +39,7 @@ struct WebView: UIViewRepresentable {
         let configuration = WKWebViewConfiguration()
         configuration.preferences = preferences
         configuration.defaultWebpagePreferences = pagePreferences
-webView = WKWebView(frame: .zero, configuration: configuration)
+        webView = WKWebView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width*0.75), configuration: configuration)
         webView.pageZoom = 0.05
     }
     

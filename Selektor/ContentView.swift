@@ -39,7 +39,9 @@ struct ContentView: View {
                     }
                 }
             }
-            Text("Selektor")
+            if UIDevice.current.localizedModel == "iPhone" {
+                Text("Selektor")
+            }
         }
     }
 

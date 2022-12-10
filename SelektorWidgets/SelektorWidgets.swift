@@ -18,7 +18,7 @@ struct Provider: IntentTimelineProvider {
     }
     
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), text: "--", label: "Selektor", configuration: ConfigurationIntent())
+        SimpleEntry(date: Date(), results: [ResultEntry(date: Date(), text: "--", label: "Selektor")], configuration: ConfigurationIntent())
     }
 
     func getSnapshot(for configuration: ConfigurationIntent, in context: Context, completion: @escaping (SimpleEntry) -> ()) {
@@ -46,67 +46,93 @@ struct Provider: IntentTimelineProvider {
     }
     
     private func getEntry(_ context: Context, _ configuration: ConfigurationIntent) throws -> SimpleEntry {
-        let request = NSFetchRequest<Config>(entityName: "Config")
-        request.predicate = NSPredicate(format: "isWidget == TRUE")
-        let entries = try managedObjectContext.fetch(request)
-        print("got entries \(entries) with isWidget == TRUE")
-        if let e = entries.first {
-            print("returning entry lastFetch: \(e.lastFetch), result: \(e.result), name: \(e.name)")
-            return SimpleEntry(date: e.lastFetch ?? Date(), text: e.result?.description() ?? "--", label: e.name ?? "", configuration: configuration)
+        print("fetching entry...")
+        do {
+            let request = NSFetchRequest<Config>(entityName: "Config")
+            request.predicate = NSPredicate(format: "isWidget == TRUE")
+            let entries = try managedObjectContext.fetch(request)
+            print("got entries \(entries) with isWidget == TRUE")
+            if !entries.isEmpty {
+                return SimpleEntry(
+                    date: Date(),
+                    results: entries.map { entry in
+                        ResultEntry(date: entry.lastFetch ?? Date(), text: entry.result?.description() ?? "--", label: entry.name ?? "")
+                    },
+                    configuration: configuration
+                )
+            }
+        } catch {
+            print("error loading configs: \(error)")
         }
         return placeholder(in: context)
     }
 }
 
-struct SimpleEntry: TimelineEntry {
+struct ResultEntry: Identifiable {
     let date: Date
     let text: String
     let label: String
+    let id: String
+    
+    init(date: Date, text: String, label: String, id: String = UUID().uuidString) {
+        self.date = date
+        self.text = text
+        self.label = label
+        self.id = id
+    }
+}
+
+struct SimpleEntry: TimelineEntry {
+    let date: Date
+    let results: [ResultEntry]
     let configuration: ConfigurationIntent
 }
+
+let dateFormatter = {
+    let f = DateFormatter()
+    f.dateStyle = .short
+    f.timeStyle = .short
+    return f
+}()
 
 struct SelektorWidgetsEntryView : View {
     var entry: Provider.Entry
 
     var body: some View {
-        VStack {
-            Text(entry.label).font(.system(size: 12, weight: .black).lowercaseSmallCaps())
-            Spacer()
-            Text(entry.text)
-            Spacer()
-        }
+        //TabView() {
+            VStack {
+                ForEach(entry.results) { result in
+                    VStack {
+                        Spacer()
+                        Text(result.label).font(.system(size: 12, weight: .black).lowercaseSmallCaps())
+                        Spacer()
+                        Text(result.text).font(.system(size: 18))
+                        Spacer()
+                        Text("\(result.date, formatter: dateFormatter)")
+                        Spacer()
+                    }
+                }
+            }
+        //}.tabViewStyle(.page)
     }
 }
 
 @main
 struct SelektorWidgets: Widget {
     let kind: String = "SelektorWidgets"
-    let config: Config? = getWidgetConfig()
 
     var body: some WidgetConfiguration {
         IntentConfiguration(kind: kind, intent: ConfigurationIntent.self, provider: Provider(context: PersistenceController.shared.container.viewContext)) { entry in
             SelektorWidgetsEntryView(entry: entry)
         }
-        .configurationDisplayName(config?.name ?? "Selektor Widget")
+        .configurationDisplayName("Selektor")
         .description("Widget showing selected values from a web page.")
-    }
-
-    static func getWidgetConfig() -> Config? {
-        do {
-            let request = NSFetchRequest<Config>(entityName: "Config")
-            request.predicate = NSPredicate(format: "isWidget == TRUE")
-            let configs = try PersistenceController.shared.container.viewContext.fetch(request)
-            return configs.first
-        } catch {
-            print("could not fetch configs: \(error)")
-            return nil
-        }
     }
 }
 
 struct SelektorWidgets_Previews: PreviewProvider {
     static var previews: some View {
-        SelektorWidgetsEntryView(entry: SimpleEntry(date: Date(), text: "Test", label: "Preview", configuration: ConfigurationIntent()))
+        SelektorWidgetsEntryView(entry: SimpleEntry(date: Date(), results: [ResultEntry(date: Date(), text: "Test", label: "Preview")], configuration: ConfigurationIntent()))
             .previewContext(WidgetPreviewContext(family: .systemSmall))
     }
 }

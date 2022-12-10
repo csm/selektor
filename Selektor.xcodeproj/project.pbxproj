@@ -59,6 +59,8 @@
 		70E20F06293F009800F2B2B3 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F05293F009800F2B2B3 /* Constants.swift */; };
 		70E20F082940050B00F2B2B3 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F072940050B00F2B2B3 /* DownloadManager.swift */; };
 		70E20F0A2941618600F2B2B3 /* AlertConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F092941618600F2B2B3 /* AlertConfigView.swift */; };
+		70E20F0C2943F2BD00F2B2B3 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */; };
+		70E20F0F2944433800F2B2B3 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -151,6 +153,9 @@
 		70E20F05293F009800F2B2B3 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		70E20F072940050B00F2B2B3 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		70E20F092941618600F2B2B3 /* AlertConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertConfigView.swift; sourceTree = "<group>"; };
+		70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertType.swift; sourceTree = "<group>"; };
+		70E20F0D2944413A00F2B2B3 /* SelektorWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SelektorWidgetsExtension.entitlements; sourceTree = "<group>"; };
+		70E20F0E2944415A00F2B2B3 /* Selektor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Selektor.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +211,7 @@
 		70C18E13293678E9009C09D0 = {
 			isa = PBXGroup;
 			children = (
+				70E20F0D2944413A00F2B2B3 /* SelektorWidgetsExtension.entitlements */,
 				70E20EFE293E7B8D00F2B2B3 /* Common */,
 				70C18E1E293678E9009C09D0 /* Selektor */,
 				70C18E35293678EB009C09D0 /* SelektorTests */,
@@ -232,6 +238,7 @@
 		70C18E1E293678E9009C09D0 /* Selektor */ = {
 			isa = PBXGroup;
 			children = (
+				70E20F0E2944415A00F2B2B3 /* Selektor.entitlements */,
 				70C18E1F293678E9009C09D0 /* SelektorApp.swift */,
 				70C18E21293678E9009C09D0 /* ContentView.swift */,
 				70C18E23293678EB009C09D0 /* Assets.xcassets */,
@@ -321,6 +328,7 @@
 				70C18E752936AAF3009C09D0 /* Config.swift */,
 				70C18E792936DE64009C09D0 /* Duration.swift */,
 				70E20F05293F009800F2B2B3 /* Constants.swift */,
+				70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -542,6 +550,7 @@
 				70C18E742936AA83009C09D0 /* SelectorView.swift in Sources */,
 				70E20F04293EA72800F2B2B3 /* HistoryView.swift in Sources */,
 				70C18E762936AAF3009C09D0 /* Config.swift in Sources */,
+				70E20F0C2943F2BD00F2B2B3 /* AlertType.swift in Sources */,
 				70C18E29293678EB009C09D0 /* Persistence.swift in Sources */,
 				70E20F082940050B00F2B2B3 /* DownloadManager.swift in Sources */,
 				70C18E22293678E9009C09D0 /* ContentView.swift in Sources */,
@@ -592,6 +601,7 @@
 				70E20EF6293A9FA100F2B2B3 /* Persistence.swift in Sources */,
 				70E20EEE293A940300F2B2B3 /* SelektorWidgets.intentdefinition in Sources */,
 				70E20EFD293E7B1000F2B2B3 /* Duration.swift in Sources */,
+				70E20F0F2944433800F2B2B3 /* AlertType.swift in Sources */,
 				70E20EE9293A940200F2B2B3 /* SelektorWidgets.swift in Sources */,
 				70E20EFB293E779800F2B2B3 /* Config.swift in Sources */,
 				70E20EFA293AA51100F2B2B3 /* Selector.swift in Sources */,
@@ -744,6 +754,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Selektor/Selektor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Selektor/Preview Content\"";
@@ -777,6 +788,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Selektor/Selektor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Selektor/Preview Content\"";
@@ -945,6 +957,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SelektorWidgetsExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3W2S6XUTR8;
@@ -972,6 +985,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SelektorWidgetsExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3W2S6XUTR8;

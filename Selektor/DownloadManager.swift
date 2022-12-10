@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreData
+import UserNotifications
 
 class DownloadManager: NSObject, ObservableObject {
     static let shared = DownloadManager()
@@ -61,6 +62,39 @@ extension DownloadManager : URLSessionDelegate, URLSessionDownloadDelegate {
 }
 
 extension DownloadManager {
+    func emitNotification(result: Result, config: Config) {
+        let content = UNMutableNotificationContent()
+        content.title = config.name ?? "Selektor Value Updated"
+        switch config.alertType {
+        case .everyTime:
+            content.body = "Latest value is \(result.description())."
+        case .valueChanged:
+            content.body = "Value changed to \(result.description())."
+        case let .valueIsLessThan(value, equals):
+            if equals {
+                content.body = "New value \(result.description()) is less than or equal to \(value)."
+            } else {
+                content.body = "New value \(result.description()) is less than \(value)."
+            }
+        case let .valueIsGreaterThan(value, equals):
+            if equals {
+                content.body = "New value \(result.description()) is greater than or equal to \(value)."
+            } else {
+                content.body = "New value \(result.description()) is greater than \(value)."
+            }
+        default: return
+        }
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
+        
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let e = error {
+                print("failed to send notification with error \(e)")
+            }
+        }
+    }
+    
     func handleDownload(_ id: UUID, _ location: URL?, _ error: Error?) {
         let viewContext = PersistenceController.shared.container.viewContext
         let request = NSFetchRequest<Config>(entityName: "Config")
@@ -77,6 +111,58 @@ extension DownloadManager {
                     result = nil
                     err = error
                 }
+                let oldResult = config.result
+                if let result = result {
+                    switch config.alertType {
+                    case .none: break
+                    case .everyTime:
+                        emitNotification(result: result, config: config)
+                    case .valueChanged:
+                        if oldResult != result {
+                            emitNotification(result: result, config: config)
+                        }
+                    case let .valueIsGreaterThan(value, equals):
+                        switch result {
+                        case let .FloatResult(f):
+                            if equals {
+                                if f >= value {
+                                    emitNotification(result: result, config: config)
+                                }
+                            } else if f > value {
+                                emitNotification(result: result, config: config)
+                            }
+                        case let .PercentResult(f):
+                            if equals {
+                                if f * 100 >= value {
+                                    emitNotification(result: result, config: config)
+                                } else if f * 100 > value {
+                                    emitNotification(result: result, config: config)
+                                }
+                            }
+                        default: break
+                        }
+                    case let .valueIsLessThan(value, equals):
+                        switch result {
+                        case let .FloatResult(f):
+                            if equals {
+                                if f <= value {
+                                    emitNotification(result: result, config: config)
+                                }
+                            } else if f < value {
+                                emitNotification(result: result, config: config)
+                            }
+                        case let .PercentResult(f):
+                            if equals {
+                                if f * 100 <= value {
+                                    emitNotification(result: result, config: config)
+                                } else if f * 100 < value {
+                                    emitNotification(result: result, config: config)
+                                }
+                            }
+                        default: break
+                        }
+                    }
+                }
                 config.lastFetch = Date()
                 config.result = result
                 config.lastError = err?.localizedDescription
@@ -86,7 +172,9 @@ extension DownloadManager {
                 newHistory.configId = id
                 newHistory.result = result
                 newHistory.error = err?.localizedDescription
-                try viewContext.save()
+                try DispatchQueue.main.sync {
+                    try viewContext.save()
+                }
                 let historyRequest = NSFetchRequest<History>(entityName: "History")
                 historyRequest.predicate = NSPredicate(format: "configId = %@", argumentArray: [id])
                 historyRequest.sortDescriptors = [NSSortDescriptor(keyPath: \History.date, ascending: true)]
@@ -96,7 +184,9 @@ extension DownloadManager {
                     h.forEach { e in
                         viewContext.delete(e)
                     }
-                    try viewContext.save()
+                    try DispatchQueue.main.sync {
+                        try viewContext.save()
+                    }
                 }
             }
         } catch {

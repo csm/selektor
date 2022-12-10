@@ -50,6 +50,25 @@ extension Config {
     var nextFireDate: Date {
         return max((self.lastFetch ?? Date()).addingTimeInterval(TimeUnit.forTag(tag: self.triggerIntervalUnits ?? "d").toTimeInterval(timeValue: self.triggerInterval.positive())), Date())
     }
+    
+    var alertType: AlertType {
+        get {
+            return AlertType.alertType(forTag: self.alertTypeTag, compareValue: self.alertCompareValue, orEquals: self.alertOrEquals)
+        }
+        set {
+            self.alertTypeTag = newValue.tag
+            switch newValue {
+            case let .valueIsGreaterThan(value, orEquals):
+                self.alertCompareValue = value
+                self.alertOrEquals = orEquals
+            case let .valueIsLessThan(value, orEquals):
+                self.alertCompareValue = value
+                self.alertOrEquals = orEquals
+            default:
+                break
+            }
+        }
+    }
 }
 
 extension History {
