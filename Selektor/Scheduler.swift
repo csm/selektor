@@ -57,8 +57,8 @@ class Scheduler {
                             request.setValue("en", forHTTPHeaderField: "Accept-Language")
                             URLSession.shared.downloadTask(with: request) { location, response, error in
                                 DownloadManager.shared.handleDownload(config.id!, location, error)
-                                currentNextFire = nil
-                                currentTimer = nil
+                                self.currentNextFire = nil
+                                self.currentTimer = nil
                             }.resume()
                         }
                     } catch {
