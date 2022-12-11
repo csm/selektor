@@ -61,6 +61,8 @@
 		70E20F0A2941618600F2B2B3 /* AlertConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F092941618600F2B2B3 /* AlertConfigView.swift */; };
 		70E20F0C2943F2BD00F2B2B3 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */; };
 		70E20F0F2944433800F2B2B3 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */; };
+		70E20F1129450F5E00F2B2B3 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F1029450F5E00F2B2B3 /* AppGroup.swift */; };
+		70E20F1229450F5E00F2B2B3 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F1029450F5E00F2B2B3 /* AppGroup.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -156,6 +158,7 @@
 		70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertType.swift; sourceTree = "<group>"; };
 		70E20F0D2944413A00F2B2B3 /* SelektorWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SelektorWidgetsExtension.entitlements; sourceTree = "<group>"; };
 		70E20F0E2944415A00F2B2B3 /* Selektor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Selektor.entitlements; sourceTree = "<group>"; };
+		70E20F1029450F5E00F2B2B3 /* AppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -329,6 +332,7 @@
 				70C18E792936DE64009C09D0 /* Duration.swift */,
 				70E20F05293F009800F2B2B3 /* Constants.swift */,
 				70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */,
+				70E20F1029450F5E00F2B2B3 /* AppGroup.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -561,6 +565,7 @@
 				70C18E2C293678EB009C09D0 /* Selektor.xcdatamodeld in Sources */,
 				70E20EB829371E5300F2B2B3 /* WebView.swift in Sources */,
 				70C18E20293678E9009C09D0 /* SelektorApp.swift in Sources */,
+				70E20F1129450F5E00F2B2B3 /* AppGroup.swift in Sources */,
 				70C18E782936C770009C09D0 /* Ext.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -601,6 +606,7 @@
 				70E20EF6293A9FA100F2B2B3 /* Persistence.swift in Sources */,
 				70E20EEE293A940300F2B2B3 /* SelektorWidgets.intentdefinition in Sources */,
 				70E20EFD293E7B1000F2B2B3 /* Duration.swift in Sources */,
+				70E20F1229450F5E00F2B2B3 /* AppGroup.swift in Sources */,
 				70E20F0F2944433800F2B2B3 /* AlertType.swift in Sources */,
 				70E20EE9293A940200F2B2B3 /* SelektorWidgets.swift in Sources */,
 				70E20EFB293E779800F2B2B3 /* Config.swift in Sources */,

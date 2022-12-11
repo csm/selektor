@@ -264,36 +264,10 @@ struct SelectorView: View, OnCommitHandler {
             self.config.elementIndex = (Int32(self.resultIndex) ?? 1) - 1
             self.config.resultType = self.decodeAs.tag()
             self.config.isWidget = self.isWidget
-            if self.wasUpdated {
-                self.config.result = self.lastResult
-                self.config.lastError = self.lastError?.localizedDescription
-                let newHistory = History(context: self.viewContext)
-                newHistory.configId = self.config.id
-                newHistory.id = UUID()
-                newHistory.date = Date()
-                newHistory.result = self.lastResult
-                newHistory.error = self.lastError?.localizedDescription
-            }
             do {
                 try self.viewContext.save()
             } catch {
                 print("failed to save! \(error)")
-            }
-            if self.wasUpdated {
-                let historyRequest = NSFetchRequest<History>(entityName: "History")
-                historyRequest.predicate = NSPredicate(format: "configId = %@", argumentArray: [self.config.id!])
-                historyRequest.sortDescriptors = [NSSortDescriptor(keyPath: \History.date, ascending: true)]
-                do {
-                    let history = try self.viewContext.fetch(historyRequest)
-                    if history.count > 20 {
-                        history.dropLast(20).forEach { e in
-                            self.viewContext.delete(e)
-                        }
-                        try self.viewContext.save()
-                    }
-                } catch {
-                    print("couldn't update history! \(error)")
-                }
             }
             Scheduler.shared.scheduleConfigs()
         }

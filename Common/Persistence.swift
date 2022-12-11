@@ -36,6 +36,10 @@ struct PersistenceController {
         container = NSPersistentContainer(name: "Selektor")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+        } else {
+            let storeUrl = AppGroup.main.containerUrl.appending(component: "main.sqlite")
+            let description = NSPersistentStoreDescription(url: storeUrl)
+            container.persistentStoreDescriptions = [description]
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {

@@ -21,168 +21,40 @@ struct AlertConfigView: View {
                 Text("Alert Config").font(.system(size: 18, weight: .black).lowercaseSmallCaps())
             }
             List {
-                HStack {
-                    Text("None")
-                    Spacer()
-                    switch alertType{
-                    case .none:
-                        Image(systemName: "checkmark")
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                    default: EmptyView()
-                    }
-                }.onTapGesture {
-                    withAnimation {
-                        alertType = .none
-                    }
-                }
-                
-                HStack {
-                    Text("On Every Update")
-                    Spacer()
-                    switch alertType{
-                    case .everyTime:
-                        Image(systemName: "checkmark")
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                    default: EmptyView()
-                    }
-                }.onTapGesture {
-                    Task() {
-                        do {
-                            if try await checkNotificationPermission() {
-                                DispatchQueue.main.async {
-                                    withAnimation {
-                                        alertType = .everyTime
-                                    }
-                                }
-                            }
-                        } catch {
-                            print("error updating alert type \(error)")
-                        }
-                    }
-                }
-                
-                HStack {
-                    Text("When Value Changes")
-                    Spacer()
-                    switch alertType {
-                    case .valueChanged:
-                        Image(systemName: "checkmark")
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                        
-                    default:
-                        EmptyView()
-                    }
-                }.onTapGesture {
-                    Task() {
-                        do {
-                            if try await checkNotificationPermission() {
-                                DispatchQueue.main.async {
-                                    withAnimation {
-                                        alertType = .valueChanged
-                                    }
-                                }
-                            }
-                        } catch {
-                            print("error updating alert type \(error)")
-                        }
-                    }
-                }
-                
-                HStack {
-                    Text("When Value is Greater Than")
-                    Spacer()
-                    switch alertType {
-                    case let .valueIsGreaterThan(_, equals):
-                        HStack {
-                            TextField("value", text: $compareAmount)
-                                .keyboardType(.numberPad)
-                                .onSubmit {
-                                    if let f = Float(compareAmount) {
-                                        alertType = .valueIsGreaterThan(value: f, orEquals: equals)
-                                    }
-                                }
-                            Image(systemName: "checkmark")
-                                .frame(width: 12, height: 12)
-                        }
-                    default:
-                        EmptyView()
-                    }
-                }.onTapGesture {
-                    switch alertType {
-                    case .valueIsGreaterThan: break
-                    default:
-                        Task() {
-                            do {
-                                if try await checkNotificationPermission() {
-                                    DispatchQueue.main.async {
-                                        withAnimation {
-                                            compareAmount = "0"
-                                            alertType = .valueIsGreaterThan(value: 0.0)
-                                        }
-                                    }
-                                }
-                            } catch {
-                                print("error updating alert type \(error)")
-                            }
-                        }
-                    }
-                }
-                
-                switch alertType {
-                case let .valueIsGreaterThan(value, equals):
+                Section {
                     HStack {
-                        Text("Or Equal To?").padding(.leading, 18)
+                        Text("None")
                         Spacer()
-                        if equals {
+                        switch alertType{
+                        case .none:
                             Image(systemName: "checkmark")
                                 .resizable()
                                 .frame(width: 12, height: 12)
-                        } else {
-                            EmptyView()
+                        default: EmptyView()
                         }
                     }.onTapGesture {
                         withAnimation {
-                            alertType = .valueIsGreaterThan(value: value, orEquals: !equals)
+                            alertType = .none
                         }
                     }
-                default:
-                    EmptyView()
-                }
-                
-                HStack {
-                    Text("When Value is Less Than")
-                    Spacer()
-                    switch alertType {
-                    case let .valueIsLessThan(_, equals):
-                        HStack {
-                            TextField("value", text: $compareAmount)
-                                .keyboardType(.numberPad)
-                                .onSubmit {
-                                    if let f = Float(compareAmount) {
-                                        alertType = .valueIsLessThan(value: f, orEquals: equals)
-                                    }
-                                }.frame(maxWidth: 30, alignment: .trailing)
+                    
+                    HStack {
+                        Text("On Every Update")
+                        Spacer()
+                        switch alertType{
+                        case .everyTime:
                             Image(systemName: "checkmark")
                                 .resizable()
                                 .frame(width: 12, height: 12)
+                        default: EmptyView()
                         }
-                    default:
-                        EmptyView()
-                    }
-                }.onTapGesture {
-                    switch alertType {
-                    case .valueIsLessThan: break
-                    default:
+                    }.onTapGesture {
                         Task() {
                             do {
                                 if try await checkNotificationPermission() {
                                     DispatchQueue.main.async {
                                         withAnimation {
-                                            compareAmount = "0"
-                                            alertType = .valueIsLessThan(value: 0.0)
+                                            alertType = .everyTime
                                         }
                                     }
                                 }
@@ -191,25 +63,159 @@ struct AlertConfigView: View {
                             }
                         }
                     }
-                }
-                
-                switch alertType {
-                case let .valueIsLessThan(value, equals):
+                    
                     HStack {
-                        Text("Or Equal To?").padding(.leading, 18)
+                        Text("When Value Changes")
                         Spacer()
-                        if equals {
+                        switch alertType {
+                        case .valueChanged:
                             Image(systemName: "checkmark")
                                 .resizable()
                                 .frame(width: 12, height: 12)
-                        } else {
+                            
+                        default:
                             EmptyView()
                         }
                     }.onTapGesture {
-                        alertType = .valueIsLessThan(value: value, orEquals: !equals)
+                        Task() {
+                            do {
+                                if try await checkNotificationPermission() {
+                                    DispatchQueue.main.async {
+                                        withAnimation {
+                                            alertType = .valueChanged
+                                        }
+                                    }
+                                }
+                            } catch {
+                                print("error updating alert type \(error)")
+                            }
+                        }
                     }
-                default:
-                    EmptyView()
+                    
+                    HStack {
+                        Text("When Value is Greater Than")
+                        Spacer()
+                        switch alertType {
+                        case let .valueIsGreaterThan(_, equals):
+                            HStack {
+                                TextField("value", text: $compareAmount)
+                                    .keyboardType(.numberPad)
+                                    .onSubmit {
+                                        if let f = Float(compareAmount) {
+                                            alertType = .valueIsGreaterThan(value: f, orEquals: equals)
+                                        }
+                                    }
+                                Image(systemName: "checkmark")
+                                    .frame(width: 12, height: 12)
+                            }
+                        default:
+                            EmptyView()
+                        }
+                    }.onTapGesture {
+                        switch alertType {
+                        case .valueIsGreaterThan: break
+                        default:
+                            Task() {
+                                do {
+                                    if try await checkNotificationPermission() {
+                                        DispatchQueue.main.async {
+                                            withAnimation {
+                                                compareAmount = "0"
+                                                alertType = .valueIsGreaterThan(value: 0.0)
+                                            }
+                                        }
+                                    }
+                                } catch {
+                                    print("error updating alert type \(error)")
+                                }
+                            }
+                        }
+                    }
+                    
+                    switch alertType {
+                    case let .valueIsGreaterThan(value, equals):
+                        HStack {
+                            Text("Or Equal To?").padding(.leading, 18)
+                            Spacer()
+                            if equals {
+                                Image(systemName: "checkmark")
+                                    .resizable()
+                                    .frame(width: 12, height: 12)
+                            } else {
+                                EmptyView()
+                            }
+                        }.onTapGesture {
+                            withAnimation {
+                                alertType = .valueIsGreaterThan(value: value, orEquals: !equals)
+                            }
+                        }
+                    default:
+                        EmptyView()
+                    }
+                    
+                    HStack {
+                        Text("When Value is Less Than")
+                        Spacer()
+                        switch alertType {
+                        case let .valueIsLessThan(_, equals):
+                            HStack {
+                                TextField("value", text: $compareAmount)
+                                    .keyboardType(.numberPad)
+                                    .onSubmit {
+                                        if let f = Float(compareAmount) {
+                                            alertType = .valueIsLessThan(value: f, orEquals: equals)
+                                        }
+                                    }.frame(maxWidth: 30, alignment: .trailing)
+                                Image(systemName: "checkmark")
+                                    .resizable()
+                                    .frame(width: 12, height: 12)
+                            }
+                        default:
+                            EmptyView()
+                        }
+                    }.onTapGesture {
+                        switch alertType {
+                        case .valueIsLessThan: break
+                        default:
+                            Task() {
+                                do {
+                                    if try await checkNotificationPermission() {
+                                        DispatchQueue.main.async {
+                                            withAnimation {
+                                                compareAmount = "0"
+                                                alertType = .valueIsLessThan(value: 0.0)
+                                            }
+                                        }
+                                    }
+                                } catch {
+                                    print("error updating alert type \(error)")
+                                }
+                            }
+                        }
+                    }
+                    
+                    switch alertType {
+                    case let .valueIsLessThan(value, equals):
+                        HStack {
+                            Text("Or Equal To?").padding(.leading, 18)
+                            Spacer()
+                            if equals {
+                                Image(systemName: "checkmark")
+                                    .resizable()
+                                    .frame(width: 12, height: 12)
+                            } else {
+                                EmptyView()
+                            }
+                        }.onTapGesture {
+                            alertType = .valueIsLessThan(value: value, orEquals: !equals)
+                        }
+                    default:
+                        EmptyView()
+                    }
+                }
+                
+                Section {
+                    Toggle("Play Sound", isOn: $config.alertSound).toggleStyle(.switch)
                 }
             }.onAppear {
                 alertType = config.alertType

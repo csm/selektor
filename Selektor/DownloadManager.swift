@@ -25,6 +25,8 @@ class DownloadManager: NSObject, ObservableObject {
     
     func startDownload(url: URL, with headers: Dictionary<String, String> = [:]) {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        request.allowsCellularAccess = true
+        request.attribution = .user
         headers.forEach { (k, v) in
             request.setValue(v, forHTTPHeaderField: k)
         }
@@ -83,6 +85,9 @@ extension DownloadManager {
                 content.body = "New value \(result.description()) is greater than \(value)."
             }
         default: return
+        }
+        if config.alertSound {
+            content.sound = UNNotificationSound.default
         }
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)

@@ -3,6 +3,7 @@
     <entity name="Config" representedClassName="Config" syncable="YES" codeGenerationType="class">
         <attribute name="alertCompareValue" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="alertOrEquals" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="alertSound" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="alertTypeTag" optional="YES" attributeType="String"/>
         <attribute name="elementIndex" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
