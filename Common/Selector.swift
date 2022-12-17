@@ -15,7 +15,7 @@ extension Config {
             do {
                 return try decoder.decode(Result.self, from: d)
             } catch {
-                print("could not decode lastValue: \(error)")
+                logger.error("could not decode lastValue: \(error)")
             }
         }
         return nil

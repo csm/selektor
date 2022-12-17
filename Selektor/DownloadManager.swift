@@ -38,27 +38,43 @@ class DownloadManager: NSObject, ObservableObject {
         tasks.append(task)
     }
     
-    func updateTasks() {
+    func updateTasks(_ completionHandler: (() -> Void)? = nil) {
         urlSession.getAllTasks { tasks in
             DispatchQueue.main.async {
                 self.tasks = tasks
+                if let completionHandler = completionHandler {
+                    completionHandler()
+                }
             }
         }
     }
 }
 
 extension DownloadManager : URLSessionDelegate, URLSessionDownloadDelegate {
+    func urlSession(_ session: URLSession, didCreateTask task: URLSessionTask) {
+        logger.info("urlSession \(session) didCreateTask: \(task)")
+    }
+
+    func urlSession(_ session: URLSession, taskIsWaitingForConnectivity task: URLSessionTask) {
+        logger.info("urlSession \(session) taskIsWaitingForConnectivity: \(task)")
+    }
+    
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        self.tasks = self.tasks.filter { t in t != downloadTask }
+        logger.debug("urlSession \(session) downloadTask: \(downloadTask) didFinishDownloadingTo: \(location)")
         if let idStr = downloadTask.currentRequest?.value(forHTTPHeaderField: configIdHeaderKey), let id = UUID(uuidString: idStr) {
-            self.handleDownload(id, location, nil)
+            self.handleDownload(id, location, nil, true)
         }
+        self.updateTasks()
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        logger.debug("urlSession \(session) task: \(task) didCompleteWithError: \(error)")
         self.tasks = self.tasks.filter { t in t != task }
-        if let idStr = task.currentRequest?.value(forHTTPHeaderField: configIdHeaderKey), let id = UUID(uuidString: idStr) {
-            self.handleDownload(id, nil, error)
+        if let error = error {
+            if let idStr = task.currentRequest?.value(forHTTPHeaderField: configIdHeaderKey), let id = UUID(uuidString: idStr) {
+                self.handleDownload(id, nil, error, true)
+            }
+            self.updateTasks()
         }
     }
 }
@@ -69,9 +85,19 @@ extension DownloadManager {
         content.title = config.name ?? "Selektor Value Updated"
         switch config.alertType {
         case .everyTime:
-            content.body = "Latest value is \(result.description())."
+            switch config.result {
+            case let .StringResult(s):
+                content.body = s
+            default:
+                content.body = "Latest value is \(result.description())."
+            }
         case .valueChanged:
-            content.body = "Value changed to \(result.description())."
+            switch config.result {
+            case let .StringResult(s):
+                content.body = s
+            default:
+                content.body = "Value changed to \(result.description())."
+            }
         case let .valueIsLessThan(value, equals):
             if equals {
                 content.body = "New value \(result.description()) is less than or equal to \(value)."
@@ -95,12 +121,12 @@ extension DownloadManager {
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request) { error in
             if let e = error {
-                print("failed to send notification with error \(e)")
+                logger.error("failed to send notification with error \(e)")
             }
         }
     }
     
-    func handleDownload(_ id: UUID, _ location: URL?, _ error: Error?) {
+    func handleDownload(_ id: UUID, _ location: URL?, _ error: Error?, _ fromBackground: Bool = false) {
         let viewContext = PersistenceController.shared.container.viewContext
         let request = NSFetchRequest<Config>(entityName: "Config")
         request.predicate = NSPredicate(format: "id = %@", argumentArray: [id])
@@ -195,8 +221,8 @@ extension DownloadManager {
                 }
             }
         } catch {
-            print("error updating config \(id): \(error)")
+            logger.error("error updating config \(id): \(error)")
         }
-        Scheduler.shared.scheduleConfigs()
+        Scheduler.shared.scheduleConfigs(fromBackground)
     }
 }

@@ -48,5 +48,6 @@ struct WebView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: WKWebView, context: Context) {
+        uiView.updateConstraints()
     }
 }

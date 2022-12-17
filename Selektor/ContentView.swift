@@ -39,6 +39,11 @@ struct ContentView: View {
                     }
                 }
             }
+#if DEBUG
+            List {
+                NavigationLink("Debug Logs", value: true)
+            }.navigationDestination(for: Bool.self) { _ in LogsView() }
+#endif
             if UIDevice.current.localizedModel == "iPhone" {
                 Text("Selektor")
             }
@@ -78,7 +83,7 @@ struct ContentView: View {
         do {
             try viewContext.save()
         } catch {
-            print("error saving \(error)")
+            logger.error("error saving \(error)")
         }
     }
 

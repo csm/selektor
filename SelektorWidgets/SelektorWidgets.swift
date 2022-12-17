@@ -26,7 +26,7 @@ struct Provider: IntentTimelineProvider {
             let e = try getEntry(context, configuration)
             completion(e)
         } catch {
-            print("failed to get snapshot: \(error)")
+            logger.error("failed to get snapshot: \(error)")
             completion(placeholder(in: context))
         }
     }
@@ -35,10 +35,9 @@ struct Provider: IntentTimelineProvider {
         var entries: [SimpleEntry] = []
 
         do {
-            let entry = try getEntry(context, configuration)
-            entries.append(entry)
+            entries = try getEntries(context, configuration)
         } catch {
-            print("failed to get timeline: \(error)")
+            logger.error("failed to get timeline: \(error)")
         }
 
         let timeline = Timeline(entries: entries, policy: .atEnd)
@@ -46,25 +45,40 @@ struct Provider: IntentTimelineProvider {
     }
     
     private func getEntry(_ context: Context, _ configuration: ConfigurationIntent) throws -> SimpleEntry {
-        print("fetching entry...")
-        do {
-            let request = NSFetchRequest<Config>(entityName: "Config")
-            request.predicate = NSPredicate(format: "isWidget == TRUE")
-            let entries = try managedObjectContext.fetch(request)
-            print("got entries \(entries) with isWidget == TRUE")
-            if !entries.isEmpty {
-                return SimpleEntry(
-                    date: Date(),
-                    results: entries.map { entry in
-                        ResultEntry(date: entry.lastFetch ?? Date(), text: entry.result?.description() ?? "--", label: entry.name ?? "")
-                    },
-                    configuration: configuration
-                )
-            }
-        } catch {
-            print("error loading configs: \(error)")
+        logger.notice("fetching entry...")
+        let request = NSFetchRequest<Config>(entityName: "Config")
+        request.predicate = NSPredicate(format: "isWidget == TRUE")
+        let entries = try managedObjectContext.fetch(request)
+        logger.notice("got entries \(entries) with isWidget == TRUE")
+        if !entries.isEmpty {
+            return SimpleEntry(
+                date: Date(),
+                results: entries.map { entry in
+                    ResultEntry(date: entry.lastFetch ?? Date(), text: entry.result?.description() ?? "--", label: entry.name ?? "")
+                },
+                configuration: configuration
+            )
         }
         return placeholder(in: context)
+    }
+    
+    private func getEntries(_ context: Context, _ configuration: ConfigurationIntent) throws -> [SimpleEntry] {
+        logger.notice("fetching entries...")
+        let configRequest = NSFetchRequest<Config>(entityName: "Config")
+        configRequest.predicate = NSPredicate(format: "isWidget == TRUE")
+        let entries = try managedObjectContext.fetch(configRequest)
+        if let config = entries.first, let id = config.id {
+            let request = NSFetchRequest<History>(entityName: "History")
+            request.predicate = NSPredicate(format: "configId == %@", argumentArray: [id])
+            request.sortDescriptors = [NSSortDescriptor(keyPath: \History.date, ascending: false)]
+            let history = try managedObjectContext.fetch(request)
+            var results: [SimpleEntry] = []
+            history.forEach { entry in
+                results.append(SimpleEntry(date: entry.date!, results: [ResultEntry(date: entry.date!, text: entry.result?.description() ?? "", label: config.name ?? "Selektor")], configuration: configuration))
+            }
+            return results
+        }
+        return []
     }
 }
 
@@ -106,7 +120,7 @@ struct SelektorWidgetsEntryView : View {
                         Spacer()
                         Text(result.label).font(.system(size: 12, weight: .black).lowercaseSmallCaps())
                         Spacer()
-                        Text(result.text).font(.system(size: 18))
+                        Text(result.text).font(.system(size: 24))
                         Spacer()
                         Text("\(result.date, formatter: dateFormatter)")
                         Spacer()

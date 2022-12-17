@@ -59,7 +59,7 @@ struct AlertConfigView: View {
                                     }
                                 }
                             } catch {
-                                print("error updating alert type \(error)")
+                                logger.error("error updating alert type \(error)")
                             }
                         }
                     }
@@ -87,7 +87,7 @@ struct AlertConfigView: View {
                                     }
                                 }
                             } catch {
-                                print("error updating alert type \(error)")
+                                logger.error("error updating alert type \(error)")
                             }
                         }
                     }
@@ -126,7 +126,7 @@ struct AlertConfigView: View {
                                         }
                                     }
                                 } catch {
-                                    print("error updating alert type \(error)")
+                                    logger.error("error updating alert type \(error)")
                                 }
                             }
                         }
@@ -188,7 +188,7 @@ struct AlertConfigView: View {
                                         }
                                     }
                                 } catch {
-                                    print("error updating alert type \(error)")
+                                    logger.error("error updating alert type \(error)")
                                 }
                             }
                         }

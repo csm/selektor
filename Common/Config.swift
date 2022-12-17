@@ -26,7 +26,7 @@ extension Config {
                 do {
                     return try decoder.decode(Result.self, from: encoded)
                 } catch {
-                    print("failed to decode lastResult \(encoded): \(error)")
+                    logger.error("failed to decode lastResult \(encoded.description): \(error)")
                     return nil
                 }
             }
@@ -41,14 +41,14 @@ extension Config {
                     self.lastValue = nil
                 }
             } catch {
-                print("failed to encode value \(newValue): \(error)")
+                logger.error("failed to encode value \(newValue?.description() ?? "nil"): \(error)")
                 self.lastValue = nil
             }
         }
     }
     
     var nextFireDate: Date {
-        return max((self.lastFetch ?? Date()).addingTimeInterval(TimeUnit.forTag(tag: self.triggerIntervalUnits ?? "d").toTimeInterval(timeValue: self.triggerInterval.positive())), Date())
+        return max((self.lastFetch ?? Date.distantPast).addingTimeInterval(TimeUnit.forTag(tag: self.triggerIntervalUnits ?? "d").toTimeInterval(timeValue: self.triggerInterval.positive())), Date())
     }
     
     var alertType: AlertType {
@@ -79,7 +79,7 @@ extension History {
                 do {
                     return try decoder.decode(Result.self, from: encoded)
                 } catch {
-                    print("failed to decode result \(encoded): \(error)")
+                    logger.error("failed to decode result \(encoded): \(error)")
                 }
             }
             return nil
@@ -93,7 +93,7 @@ extension History {
                     self.resultData = nil
                 }
             } catch {
-                print("failed to encode value \(newValue): \(error)")
+                logger.error("failed to encode value \(newValue?.description() ?? "nil"): \(error)")
                 self.resultData = nil
             }
         }

@@ -41,32 +41,32 @@ class ValueSelector {
     }
     
     func fetchValue(url: URL, selector: String, resultIndex: Int, resultType: ResultType, onComplete: @escaping (Result?, Error?) -> Void) {
-        print("fetching \(url) with selector \(selector) resultIndex: \(resultIndex)")
+        logger.info("fetching \(url) with selector \(selector) resultIndex: \(resultIndex) resultType: \(resultType.rawValue)")
         var request = URLRequest(url: url, timeoutInterval: 20.0)
         request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
         request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
         request.setValue("en", forHTTPHeaderField: "Accept-Language")
         let task = session.downloadTask(with: request) { location, response, error in
             if error != nil {
-                print("fetch returned error: \(error)")
+                logger.error("fetch returned error: \(error!)")
                 onComplete(nil, error)
             } else if let resp = response as? HTTPURLResponse, let u = location {
                 switch resp.statusCode {
                 case 200:
                     do {
-                        print("read data into URL: \(u)")
+                        logger.notice("read data into URL: \(u)")
                         let result = try ValueSelector.applySelector(location: u, selector: selector, resultIndex: resultIndex, resultType: resultType)
-                        print("decoded \(result)")
+                        logger.notice("decoded \(result?.description() ?? "nil")")
                         onComplete(result, nil)
                     } catch {
-                        print("error decoding \(error)")
+                        logger.error("error decoding \(error)")
                         onComplete(nil, error)
                     }
                 default:
                     onComplete(nil, ValueSelectorError.HTTPError(statusCode: resp.statusCode))
                 }
             } else {
-                print("not an HTTP response? no url? \(response) \(location)")
+                logger.error("not an HTTP response? no url? \(response) \(location?.description ?? "nil")")
                 onComplete(nil, nil)
             }
         }
@@ -102,7 +102,7 @@ class ValueSelector {
         case .Integer:
             if let h = h {
                 if let i = Int(h) {
-                    print("decoded \(h) as integer \(i)")
+                    logger.debug("decoded \(h) as integer \(i)")
                     return Result.IntegerResult(integer: i)
                 } else {
                     throw ValueSelectorError.DecodeIntError(text: h)
@@ -111,7 +111,7 @@ class ValueSelector {
         case .Float:
             if let h = h {
                 if let f = Float(h) {
-                    print("decoded \(h) as integer \(f)")
+                    logger.debug("decoded \(h) as integer \(f)")
                     return Result.FloatResult(float: f)
                 } else {
                     throw ValueSelectorError.DecodeFloatError(text: h)
@@ -119,7 +119,7 @@ class ValueSelector {
             }
         case .Percent:
             if let p = try ValueSelector.decodePercent(value: h) {
-                print("decoded \(h) as percent \(p)")
+                logger.debug("decoded \(h?.description ?? "nil") as percent \(p)")
                 return Result.PercentResult(value: p)
             }
         case .String:
@@ -127,11 +127,13 @@ class ValueSelector {
                 print("decoded string \(s)")
                 return Result.StringResult(string: s)
             }
+        case .AttributedString:
+            return Result.AttributedStringResult(string: node.attributedString)
         case .Image:
             print("TODO implement image decoding")
             return nil
         }
-        print("failed to decode \(h) as \(resultType)")
+        logger.debug("failed to decode \(h?.description ?? "nil") as \(resultType.rawValue)")
         return nil
     }
 }

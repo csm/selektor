@@ -9,11 +9,20 @@ import SwiftUI
 import CoreData
 import WebKit
 
+let emptyHtml = """
+<!DOCTYPE html>
+
+<html>
+    <head></head>
+    <body></body>
+</html>
+"""
+
 class NavigationDelegateImpl: NSObject, WKNavigationDelegate {
     static var shared = NavigationDelegateImpl()
     var blocks: [any OnCommitHandler] = []
     
-    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         blocks.forEach { handler in
             handler.onCommit(webView: webView)
         }
@@ -46,9 +55,9 @@ struct SelectorView: View, OnCommitHandler {
     @State var selectors: String = ""
     @State var highlightedSelectors: String? = nil
     @State var resultIndex: String = "1"
-    @State var decodeAs: ResultType = .String
+    @State var decodeAs: ResultType = .AttributedString
     @State var lastResult: Result? = Result.StringResult(string: "")
-    @State var resultPreview: String = ""
+    @State var resultPreview: AttributedString = AttributedString()
     @State var lastError: Error? = nil
     @State var showAlert: Bool = false
     @State var errorText: String = ""
@@ -60,8 +69,9 @@ struct SelectorView: View, OnCommitHandler {
         let userDirUrl = URL(fileURLWithPath: userDir)
         return userDirUrl.appendingPathComponent("selektor-data.html")
     }()
-
-    var webView: WKWebView? = nil
+    @State var firstLoad = true
+    
+    var webView: WKWebView
     let id = UUID().uuidString
     
     init(config: Config) {
@@ -74,7 +84,8 @@ struct SelectorView: View, OnCommitHandler {
         configuration.preferences = preferences
         configuration.defaultWebpagePreferences = pagePreferences
         self.webView = WKWebView(frame: .zero, configuration: configuration)
-        self.webView?.navigationDelegate = NavigationDelegateImpl.shared
+        self.webView.navigationDelegate = NavigationDelegateImpl.shared
+        self.webView.loadHTMLString(emptyHtml, baseURL: nil)
     }
     
     var body: some View {
@@ -145,7 +156,7 @@ struct SelectorView: View, OnCommitHandler {
                 Text("Decode As").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
                 Spacer()
                 Picker("", selection: $decodeAs) {
-                    Text("Text").tag(ResultType.String)
+                    Text("Text").tag(ResultType.AttributedString)
                     Text("Number").tag(ResultType.Float)
                     Text("Percent").tag(ResultType.Percent)
                     //Text("Image").tag(ResultType.Image)
@@ -202,15 +213,12 @@ struct SelectorView: View, OnCommitHandler {
                 }
             }
             Group {
-                if isDownloaded, let v = webView {
-                    WebView(webView: v)
-                    //.frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width * 0.75)
-                        .aspectRatio(1.33, contentMode: .fill)
-                } else {
-                    EmptyView()
-                }
                 NavigationLink(destination: HistoryView(id: config.id!)) {
                     Text("Result History").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
+                }
+                VStack(alignment: .leading) {
+                    Text("Preview").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
+                    WebView(webView: webView).aspectRatio(1.33, contentMode: .fill)
                 }
             }
         }
@@ -222,6 +230,7 @@ struct SelectorView: View, OnCommitHandler {
         .refreshable { await self.onUrlChange() }
         .onAppear {
             NavigationDelegateImpl.shared.registerListener(listener: self)
+            webView.loadHTMLString(emptyHtml, baseURL: nil)
             self.isDownloaded = false
             if let v = self.config.name {
                 self.name = v
@@ -248,7 +257,7 @@ struct SelectorView: View, OnCommitHandler {
                 self.selectors = s
             }
             self.resultIndex = "\(self.config.elementIndex + 1)"
-            self.decodeAs = ResultType.from(tag: self.config.resultType ?? "s") ?? ResultType.String
+            self.decodeAs = ResultType.from(tag: self.config.resultType ?? "s") ?? ResultType.AttributedString
             self.isWidget = self.config.isWidget
             Task(priority: .userInitiated) {
                 await self.onUrlChange()
@@ -267,7 +276,20 @@ struct SelectorView: View, OnCommitHandler {
             do {
                 try self.viewContext.save()
             } catch {
-                print("failed to save! \(error)")
+                logger.error("failed to save! \(error)")
+            }
+            if isWidget {
+                do {
+                    let request = NSFetchRequest<Config>(entityName: "Config")
+                    request.predicate = NSPredicate(format: "id != %@ AND isWidget == TRUE", argumentArray: [config.id!])
+                    let results = try viewContext.fetch(request)
+                    if !results.isEmpty {
+                        results.forEach { e in e.isWidget = false }
+                        try viewContext.save()
+                    }
+                } catch {
+                    logger.error("failed to update isWidget on other configs: \(error)")
+                }
             }
             Scheduler.shared.scheduleConfigs()
         }
@@ -288,16 +310,16 @@ struct SelectorView: View, OnCommitHandler {
                         do {
                             try FileManager.default.removeItem(at: SelectorView.downloadPath)
                         } catch {
-                            print("ignoring error deleting \(SelectorView.downloadPath): \(error)")
+                            logger.error("ignoring error deleting \(SelectorView.downloadPath): \(error)")
                         }
                         try FileManager.default.copyItem(at: data, to: SelectorView.downloadPath)
                         lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i-1, resultType: decodeAs)
                         lastError = nil
-                        resultPreview = lastResult?.description() ?? ""
+                        resultPreview = lastResult?.attributedString ?? AttributedString()
                         DispatchQueue.main.async {
                             var request = URLRequest(url: SelectorView.downloadPath, cachePolicy: .reloadIgnoringLocalCacheData)
                             request.attribution = .user
-                            self.webView?.load(request)
+                            self.webView.load(request)
                         }
                     default:
                         isDownloaded = true
@@ -315,7 +337,7 @@ struct SelectorView: View, OnCommitHandler {
                 do {
                     try FileManager.default.removeItem(at: SelectorView.downloadPath)
                 } catch {
-                    print("failed to delete \(SelectorView.downloadPath): \(error)")
+                    logger.error("failed to delete \(SelectorView.downloadPath): \(error)")
                 }
                 isDownloaded = true
                 lastError = error
@@ -330,9 +352,9 @@ struct SelectorView: View, OnCommitHandler {
             self.highlightWebView()
             if let s = selectors.notBlank(), let i = Int(resultIndex) {
                 do {
-                    lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i, resultType: decodeAs)
+                    lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i-1, resultType: decodeAs)
                     lastError = nil
-                    resultPreview = lastResult?.description() ?? ""
+                    resultPreview = lastResult?.attributedString ?? AttributedString()
                 } catch {
                     lastResult = nil
                     lastError = error
@@ -375,11 +397,14 @@ if (oldElement) {
 \(clearCode)
 var element = document.querySelectorAll("\(s)")[\(i - 1)];
 if (element) {
-  element.style.outline = "#cc0 2px solid";
-  element.style.boxShadow = "0 0 0 1000vmax rgba(0, 0, 0, .3);
+  element.style.outline = "10000vmax solid rgba(0, 0, 0, .5)";
+  //element.style.boxShadow = "0 0 0 1000vmax rgba(0, 0, 0, .5)";
 }
 """
-            webView?.evaluateJavaScript(jsCode)
+            // logger.debug("evaluating javascript: \(jsCode)")
+            webView.evaluateJavaScript(jsCode) { result, error in
+                logger.notice("JS highlighter execution result \(String(describing: result)) error \(error)")
+            }
             self.highlightedSelectors = self.selectors
         }
     }
@@ -389,7 +414,18 @@ if (element) {
     }
     
     func onCommit(webView: WKWebView) {
-        highlightWebView()
+        /*if firstLoad {
+            DispatchQueue.main.async {
+                var request = URLRequest(url: SelectorView.downloadPath, cachePolicy: .reloadIgnoringLocalCacheData)
+                request.attribution = .user
+                self.webView.load(request)
+            }
+            firstLoad = false
+        } else {*/
+            Task(operation: onChange)
+        //
+        
+    //}
     }
     
     func isEqual(that: OnCommitHandler) -> Bool {

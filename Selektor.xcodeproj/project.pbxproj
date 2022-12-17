@@ -63,6 +63,12 @@
 		70E20F0F2944433800F2B2B3 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */; };
 		70E20F1129450F5E00F2B2B3 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F1029450F5E00F2B2B3 /* AppGroup.swift */; };
 		70E20F1229450F5E00F2B2B3 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F1029450F5E00F2B2B3 /* AppGroup.swift */; };
+		70E20F142946516F00F2B2B3 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F132946516F00F2B2B3 /* Logger.swift */; };
+		70E20F152946516F00F2B2B3 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F132946516F00F2B2B3 /* Logger.swift */; };
+		70E20F172946527F00F2B2B3 /* OSLog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70E20F162946527F00F2B2B3 /* OSLog.framework */; };
+		70E20F19294686FA00F2B2B3 /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E772936C770009C09D0 /* Ext.swift */; };
+		70E20F1E294BAB6F00F2B2B3 /* LogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F1D294BAB6F00F2B2B3 /* LogsView.swift */; };
+		70E20F1F294BAB6F00F2B2B3 /* LogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F1D294BAB6F00F2B2B3 /* LogsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -159,6 +165,9 @@
 		70E20F0D2944413A00F2B2B3 /* SelektorWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SelektorWidgetsExtension.entitlements; sourceTree = "<group>"; };
 		70E20F0E2944415A00F2B2B3 /* Selektor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Selektor.entitlements; sourceTree = "<group>"; };
 		70E20F1029450F5E00F2B2B3 /* AppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroup.swift; sourceTree = "<group>"; };
+		70E20F132946516F00F2B2B3 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		70E20F162946527F00F2B2B3 /* OSLog.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSLog.framework; path = System/Library/Frameworks/OSLog.framework; sourceTree = SDKROOT; };
+		70E20F1D294BAB6F00F2B2B3 /* LogsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -166,6 +175,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				70E20F172946527F00F2B2B3 /* OSLog.framework in Frameworks */,
 				70E20EBD2937EA9A00F2B2B3 /* WebKit.framework in Frameworks */,
 				70C18E682936865A009C09D0 /* BackgroundTasks.framework in Frameworks */,
 				70E20EBB2937314000F2B2B3 /* Erik in Frameworks */,
@@ -241,6 +251,7 @@
 		70C18E1E293678E9009C09D0 /* Selektor */ = {
 			isa = PBXGroup;
 			children = (
+				70C18E772936C770009C09D0 /* Ext.swift */,
 				70E20F0E2944415A00F2B2B3 /* Selektor.entitlements */,
 				70C18E1F293678E9009C09D0 /* SelektorApp.swift */,
 				70C18E21293678E9009C09D0 /* ContentView.swift */,
@@ -249,7 +260,6 @@
 				70C18E25293678EB009C09D0 /* Preview Content */,
 				70C18E6B2936990E009C09D0 /* AppDelegate.swift */,
 				70C18E732936AA82009C09D0 /* SelectorView.swift */,
-				70C18E772936C770009C09D0 /* Ext.swift */,
 				70E20EB729371E5300F2B2B3 /* WebView.swift */,
 				70E20EC229392D8200F2B2B3 /* UITextViewWrapper.swift */,
 				70E20EC42939326200F2B2B3 /* MultilineTextField.swift */,
@@ -258,6 +268,7 @@
 				70E20F03293EA72800F2B2B3 /* HistoryView.swift */,
 				70E20F072940050B00F2B2B3 /* DownloadManager.swift */,
 				70E20F092941618600F2B2B3 /* AlertConfigView.swift */,
+				70E20F1D294BAB6F00F2B2B3 /* LogsView.swift */,
 			);
 			path = Selektor;
 			sourceTree = "<group>";
@@ -290,6 +301,7 @@
 		70C18E542936797C009C09D0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				70E20F162946527F00F2B2B3 /* OSLog.framework */,
 				70E20EBC2937EA9A00F2B2B3 /* WebKit.framework */,
 				70E20EC02937EAC800F2B2B3 /* WebKit.framework */,
 				70C18E672936865A009C09D0 /* BackgroundTasks.framework */,
@@ -333,6 +345,7 @@
 				70E20F05293F009800F2B2B3 /* Constants.swift */,
 				70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */,
 				70E20F1029450F5E00F2B2B3 /* AppGroup.swift */,
+				70E20F132946516F00F2B2B3 /* Logger.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -551,11 +564,13 @@
 				70C18E7A2936DE64009C09D0 /* Duration.swift in Sources */,
 				70E20EC72939376500F2B2B3 /* ValueSelector.swift in Sources */,
 				70E20EC52939326200F2B2B3 /* MultilineTextField.swift in Sources */,
+				70E20F142946516F00F2B2B3 /* Logger.swift in Sources */,
 				70C18E742936AA83009C09D0 /* SelectorView.swift in Sources */,
 				70E20F04293EA72800F2B2B3 /* HistoryView.swift in Sources */,
 				70C18E762936AAF3009C09D0 /* Config.swift in Sources */,
 				70E20F0C2943F2BD00F2B2B3 /* AlertType.swift in Sources */,
 				70C18E29293678EB009C09D0 /* Persistence.swift in Sources */,
+				70E20F1E294BAB6F00F2B2B3 /* LogsView.swift in Sources */,
 				70E20F082940050B00F2B2B3 /* DownloadManager.swift in Sources */,
 				70C18E22293678E9009C09D0 /* ContentView.swift in Sources */,
 				70E20F0A2941618600F2B2B3 /* AlertConfigView.swift in Sources */,
@@ -576,6 +591,7 @@
 			files = (
 				70C18E722936A7AB009C09D0 /* Result.swift in Sources */,
 				70C18E37293678EB009C09D0 /* SelektorTests.swift in Sources */,
+				70E20F19294686FA00F2B2B3 /* Ext.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -602,6 +618,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				70E20EFC293E7AF000F2B2B3 /* Result.swift in Sources */,
+				70E20F1F294BAB6F00F2B2B3 /* LogsView.swift in Sources */,
+				70E20F152946516F00F2B2B3 /* Logger.swift in Sources */,
 				70E20EF9293AA23600F2B2B3 /* Selektor.xcdatamodeld in Sources */,
 				70E20EF6293A9FA100F2B2B3 /* Persistence.swift in Sources */,
 				70E20EEE293A940300F2B2B3 /* SelektorWidgets.intentdefinition in Sources */,

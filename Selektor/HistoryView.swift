@@ -24,7 +24,7 @@ struct HistoryView: View {
     var body: some View {
         List {
             ForEach(history) { e in
-                VStack {
+                VStack(alignment: .leading) {
                     Text("\(e.date ?? Date(), formatter: HistoryView.dateFormatter)")
                         .font(.system(size: 12, weight: .black).lowercaseSmallCaps())
                     if let err = e.error {
@@ -40,9 +40,9 @@ struct HistoryView: View {
             request.sortDescriptors = [NSSortDescriptor(keyPath: \History.date, ascending: false)]
             do {
                 history = try viewContext.fetch(request).filter { e in e.date != nil }
-                print("fetched history: \(history)")
+                logger.debug("fetched history, \(history.count) entries")
             } catch {
-                print("could not fetch history! \(error)")
+                logger.error("could not fetch history! \(error)")
             }
         }
     }
