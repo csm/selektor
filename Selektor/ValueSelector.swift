@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Kanna
 import CoreData
+import SwiftSoup
 
 enum ValueSelectorError: Error {
     case HTTPError(statusCode: Int)
@@ -15,6 +15,8 @@ enum ValueSelectorError: Error {
     case DecodeFloatError(text: String)
     case DecodePercentError(text: String)
     case TimeoutError
+    case UnknownError
+    case BadInputError
     
     var localizedDescription: String {
         switch self {
@@ -23,6 +25,8 @@ enum ValueSelectorError: Error {
         case let .DecodeFloatError(text: t): return "Could not read \"\(t)\" as a number."
         case let .DecodePercentError(text: t): return "Could not read \"\(t)\" as a percentage."
         case .TimeoutError: return "The request timed out."
+        case .UnknownError: return "The URL could not be fetched."
+        case .BadInputError: return "The web page could not be read."
         }
     }
 }
@@ -72,19 +76,35 @@ class ValueSelector {
         }
         task.resume()
     }
-    
-    static func applySelector(location: URL, selector: String, resultIndex: Int, resultType: ResultType) throws -> Result? {
-        let doc = try HTML(url: location, encoding: .utf8)
-        let path = doc.css(selector, namespaces: nil)
-        if path.count > resultIndex {
-            let value = path[resultIndex]
-            return try decodeResult(node: value, resultType: resultType)
-        } else {
+
+    static func applySelector(location: URL, selector: String, resultIndex: Int, resultType: ResultType, documentEncoding: String.Encoding = .utf8) throws -> Result? {
+        guard let htmlData = String(data: try Data(contentsOf: location), encoding: documentEncoding) else {
+            throw ValueSelectorError.BadInputError
+        }
+        let html = try removeScriptTags(html: htmlData)
+        let doc = try SwiftSoup.parse(html)
+        let elements = try doc.select(selector)
+        if elements.count <= resultIndex {
             return nil
+        } else {
+            let element = elements[resultIndex]
+            return try decodeResult(element: element, resultType: resultType)
         }
     }
     
-    static func decodePercent(value: String?) throws -> Float? {
+    static func decodePercent(value: String?) throws -> Decimal? {
+        if var v = value {
+            if v.hasSuffix("%") {
+                v = String(v.dropLast(1))
+            }
+            if let p = Decimal(string: v) {
+                return p / 100
+            }
+        }
+        throw ValueSelectorError.DecodePercentError(text: value ?? "")
+    }
+    
+    static func decodeLegacyPercent(value: String?) throws -> Float? {
         if var v = value {
             if v.hasSuffix("%") {
                 v = String(v.dropLast(1))
@@ -96,11 +116,57 @@ class ValueSelector {
         throw ValueSelectorError.DecodePercentError(text: value ?? "")
     }
     
-    static func decodeResult(node: XMLElement, resultType: ResultType) throws -> Result? {
-        let h = node.innerHTML?.trimmingCharacters(in: .whitespacesAndNewlines)
+    static func decodeResult(element: Element, resultType: ResultType) throws -> Result? {
+        let h = try element.html().trimmingCharacters(in: .whitespacesAndNewlines)
         switch resultType {
         case .Integer:
-            if let h = h {
+            if let i = Int(h) {
+                logger.debug("decoded \(h) as integer \(i)")
+                return Result.IntegerResult(integer: i)
+            } else {
+                throw ValueSelectorError.DecodeIntError(text: h)
+            }
+        case .Float:
+            if let f = Decimal(string: h) {
+                logger.debug("decoded \(h) as float \(f)")
+                return Result.FloatResult(float: f)
+            } else {
+                throw ValueSelectorError.DecodeFloatError(text: h)
+            }
+        case .LegacyFloat:
+            if let f = Float(h) {
+                logger.debug("decoded \(h) as float \(f)")
+                return Result.LegacyFloatResult(float: f)
+            } else {
+                throw ValueSelectorError.DecodeFloatError(text: h)
+            }
+        case .Percent:
+            if let p = try ValueSelector.decodePercent(value: h) {
+                logger.debug("decoded \(h) as percent \(p)")
+                return Result.PercentResult(value: p)
+            }
+        case .LegacyPercent:
+            if let p = try ValueSelector.decodeLegacyPercent(value: h) {
+                return Result.LegacyPercentResult(value: p)
+            }
+        case .String:
+            let s = String(element.attributedString.characters)
+            print("decoded string \(s)")
+            return Result.StringResult(string: s)
+        case .AttributedString:
+            return Result.AttributedStringResult(string: element.attributedString)
+        case .Image:
+            print("TODO implement image decoding")
+            return nil
+        }
+        logger.debug("failed to decode \(h) as \(resultType.rawValue)")
+        return nil
+    }
+    
+    static func decodeResult(text: String, resultType: ResultType) throws -> Result? {
+        switch resultType {
+        case .Integer:
+            if let h = text.notBlank() {
                 if let i = Int(h) {
                     logger.debug("decoded \(h) as integer \(i)")
                     return Result.IntegerResult(integer: i)
@@ -109,31 +175,43 @@ class ValueSelector {
                 }
             }
         case .Float:
-            if let h = h {
-                if let f = Float(h) {
-                    logger.debug("decoded \(h) as integer \(f)")
+            if let h = text.notBlank() {
+                if let f = Decimal(string: h) {
+                    logger.debug("decoded \(h) as decimal \(f)")
                     return Result.FloatResult(float: f)
                 } else {
                     throw ValueSelectorError.DecodeFloatError(text: h)
                 }
             }
+        case .LegacyFloat:
+            if let h = text.notBlank() {
+                if let f = Float(h) {
+                    return Result.LegacyFloatResult(float: f)
+                } else {
+                    throw ValueSelectorError.DecodeFloatError(text: h)
+                }
+            }
         case .Percent:
-            if let p = try ValueSelector.decodePercent(value: h) {
-                logger.debug("decoded \(h?.description ?? "nil") as percent \(p)")
+            if let p = try ValueSelector.decodePercent(value: text.notBlank()) {
+                logger.debug("decoded \(text) as percent \(p)")
                 return Result.PercentResult(value: p)
             }
+        case .LegacyPercent:
+            if let p = try ValueSelector.decodeLegacyPercent(value: text.notBlank()) {
+                return Result.LegacyPercentResult(value: p)
+            }
         case .String:
-            if let s = node.innerHTML {
+            if let str = text.notBlank() {
+                let s = String(createAttributedString(html: str).characters)
                 print("decoded string \(s)")
                 return Result.StringResult(string: s)
             }
         case .AttributedString:
-            return Result.AttributedStringResult(string: node.attributedString)
+            return Result.AttributedStringResult(string: AttributedString(stringLiteral: text))
         case .Image:
             print("TODO implement image decoding")
             return nil
         }
-        logger.debug("failed to decode \(h?.description ?? "nil") as \(resultType.rawValue)")
         return nil
     }
 }

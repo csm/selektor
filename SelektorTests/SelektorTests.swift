@@ -7,8 +7,8 @@
 
 import XCTest
 @testable import Selektor
-import SwiftMsgpack
-import Kanna
+import SwiftMsgpackCsm
+import SwiftSoup
 
 final class SelektorTests: XCTestCase {
 
@@ -39,7 +39,9 @@ final class SelektorTests: XCTestCase {
         let results: [Result] = [
             .IntegerResult(integer: 42),
             .FloatResult(float: 3.14159),
+            .LegacyFloatResult(float: 3.14159),
             .PercentResult(value: 50),
+            .LegacyPercentResult(value: 50),
             .StringResult(string: "test"),
             .ImageResult(imageData: "abc".data(using: .utf8)!)
         ]
@@ -70,8 +72,7 @@ final class SelektorTests: XCTestCase {
     }
      */
     
-    func testHtmlAttributedString() throws {
-        let html = """
+    let html = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -104,52 +105,52 @@ b, u, i, center,
 dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td {
-    margin:0;
-    padding:0;
-    border:0;
-    outline:0;
-    font-size:100%;
-    vertical-align:baseline;
-    background:transparent;
+margin:0;
+padding:0;
+border:0;
+outline:0;
+font-size:100%;
+vertical-align:baseline;
+background:transparent;
 }
 
 body {
-    line-height:1;
+line-height:1;
 }
 
 ol, ul {
-    list-style:none;
+list-style:none;
 }
 
 blockquote, q {
-    quotes:none;
+quotes:none;
 }
 
 blockquote:before,
 blockquote:after,
 q:before, q:after {
-    content:'';
-    content:none;
+content:'';
+content:none;
 }
 
 /* remember to define focus styles! */
 :focus {
-    outline:0;
+outline:0;
 }
 
 /* remember to highlight inserts somehow! */
 ins {
-    text-decoration:none;
+text-decoration:none;
 }
 
 del {
-    text-decoration:line-through;
+text-decoration:line-through;
 }
 
 /* tables still need 'cellspacing="0"' in the markup */
 table {
-    border-collapse:collapse;
-    border-spacing:0;
+border-collapse:collapse;
+border-spacing:0;
 }
 
 /* site css */
@@ -189,7 +190,7 @@ cite    { font-size:.5em; }
 <main role="main">
 
 <header role="banner">
-    <h1><a href="index.php">Oblique Strategies</a></h1>
+<h1><a href="index.php">Oblique Strategies</a></h1>
 </header>
 
 <article>
@@ -199,15 +200,25 @@ cite    { font-size:.5em; }
 </article>
 
 <footer role="contentinfo">
-    <p>Copyright &copy; 2022 Brian Eno <span class="amp">&amp;</span> Peter Schmidt. All rights reserved. </p>
-    <p>Permission pending &mdash; I hope. An email has been forwarded to him.</p>
-    <p>Design <span class="amp">&amp;</span> Development by <a href="http://inkpixelspaper.com">Ink Pixels Paper</a></p>
+<p>Copyright &copy; 2022 Brian Eno <span class="amp">&amp;</span> Peter Schmidt. All rights reserved. </p>
+<p>Permission pending &mdash; I hope. An email has been forwarded to him.</p>
+<p>Design <span class="amp">&amp;</span> Development by <a href="http://inkpixelspaper.com">Ink Pixels Paper</a></p>
 </footer>
 
 </main>
 </body>
 </html>
 """
+    
+    func testCssSelector() throws {
+        let doc = try SwiftSoup.parse(html)
+        let elements = try doc.select("article h2")
+        XCTAssertGreaterThan(elements.count, 0)
+        XCTAssertEqual(try elements[0].html(), "A very small object — Its centre.")
+    }
+    
+    /*func testHtmlAttributedString() throws {
+        
         let node = try HTML(html: html.data(using: .utf8)!, encoding: .utf8)
         let element = node.css("article h2", namespaces: nil).first!
         print("got element: \(element), element text: \(element.toHTML)")
@@ -217,5 +228,5 @@ cite    { font-size:.5em; }
         print("created htmlData: \(String(data: htmlData, encoding: .utf8))")
         let attributedString2 = try NSAttributedString(data: htmlData, options: [.documentType: NSAttributedString.DocumentType.html, .characterEncoding: String.Encoding.utf8.rawValue], documentAttributes: nil)
         print("equal? \(attributedString == attributedString2)")
-    }
+    }*/
 }

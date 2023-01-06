@@ -38,7 +38,11 @@ class CustomLogger {
             }
             if let size = try FileManager.default.attributesOfItem(atPath: logFile.path)[.size] as? Int {
                 if size > 1024 * 1024 {
-                    try FileManager.default.removeItem(at: logFileBackup)
+                    do {
+                        try FileManager.default.removeItem(at: logFileBackup)
+                    } catch {
+                        // pass, ignore
+                    }
                     try FileManager.default.moveItem(at: logFile, to: logFileBackup)
                 }
             }
@@ -49,7 +53,9 @@ class CustomLogger {
     }
     
     func debug(_ message: String) {
+#if DEBUG
         log(level: .debug, message)
+#endif
     }
     
     func info(_ message: String) {

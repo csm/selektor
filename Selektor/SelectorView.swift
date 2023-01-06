@@ -9,41 +9,8 @@ import SwiftUI
 import CoreData
 import WebKit
 
-let emptyHtml = """
-<!DOCTYPE html>
-
-<html>
-    <head></head>
-    <body></body>
-</html>
-"""
-
-class NavigationDelegateImpl: NSObject, WKNavigationDelegate {
-    static var shared = NavigationDelegateImpl()
-    var blocks: [any OnCommitHandler] = []
-    
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        blocks.forEach { handler in
-            handler.onCommit(webView: webView)
-        }
-    }
-    
-    func registerListener(listener: any OnCommitHandler) {
-        blocks.append(listener)
-    }
-    
-    func unregisterListener(listener: any OnCommitHandler) {
-        blocks = blocks.filter { e in !e.isEqual(that: listener) }
-    }
-}
-
-protocol OnCommitHandler {
-    var id: String { get }
-    func onCommit(webView: WKWebView) -> Void
-    func isEqual(that: any OnCommitHandler) -> Bool
-}
-
-struct SelectorView: View, OnCommitHandler {
+struct SelectorView: View {
+    @Environment(\.presentationMode) private var presentationMode
     @Environment(\.managedObjectContext) private var viewContext
     
     @ObservedObject var config: Config
@@ -55,50 +22,156 @@ struct SelectorView: View, OnCommitHandler {
     @State var selectors: String = ""
     @State var highlightedSelectors: String? = nil
     @State var resultIndex: String = "1"
-    @State var decodeAs: ResultType = .AttributedString
+    @State var decodeAs: ResultType = .String
     @State var lastResult: Result? = Result.StringResult(string: "")
-    @State var resultPreview: AttributedString = AttributedString()
+    @State var resultPreview: String = ""
     @State var lastError: Error? = nil
     @State var showAlert: Bool = false
     @State var errorText: String = ""
     @State var isWidget: Bool = false
     @State var wasUpdated: Bool = false
     @State var isDownloaded: Bool = false
+    @State var showPreview: Bool = false
     static let downloadPath = {
         let userDir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
         let userDirUrl = URL(fileURLWithPath: userDir)
         return userDirUrl.appendingPathComponent("selektor-data.html")
     }()
-    @State var firstLoad = true
+    @State var lastEncoding: String.Encoding = .utf8
     
-    var webView: WKWebView
     let id = UUID().uuidString
-    
-    init(config: Config) {
-        self.config = config
-        let pagePreferences = WKWebpagePreferences()
-        //pagePreferences.allowsContentJavaScript = false
-        let preferences = WKPreferences()
-        preferences.isTextInteractionEnabled = false
-        let configuration = WKWebViewConfiguration()
-        configuration.preferences = preferences
-        configuration.defaultWebpagePreferences = pagePreferences
-        self.webView = WKWebView(frame: .zero, configuration: configuration)
-        self.webView.navigationDelegate = NavigationDelegateImpl.shared
-        self.webView.loadHTMLString(emptyHtml, baseURL: nil)
-    }
     
     var body: some View {
         List {
-            TextField("Name", text: $name).textInputAutocapitalization(.words)
+#if os(macOS)
+            HStack {
+                Button("Back") {
+                    self.presentationMode.wrappedValue.dismiss()
+                }
+            }
+#endif
+            self.configControls
+            VStack(alignment: .leading) {
+                Text("Result Preview").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
+                HStack {
+                    Text(resultPreview)
+                    Spacer()
+                    Button(action: {
+                        if self.lastError != nil || self.lastResult == nil {
+                            self.showAlert = true
+                        } else {
+                            self.showAlert = false
+                        }
+                    }) {
+                        Label("", systemImage: "exclamationmark.circle").foregroundColor(errorForeground())
+                    }.tint(errorForeground())
+                }
+            }
+            Group {
+                NavigationLink(destination: HistoryView(id: config.id!, name: config.name!)) {
+                    Text("Result History").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
+                }
+                Button(action: { showPreview = true }) {
+                    Text("Preview").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
+                }.foregroundColor(.primary)
+            }
+        }
+        .alert(errorText.notBlank() ?? "No value could be read.", isPresented: $showAlert) {
+            Button("OK") {}
+        }
+        .sheet(isPresented: $showPreview, onDismiss: {
+            showPreview = false
+            self.selectors = config.selector ?? ""
+        }) {
+            SelectorPreviewView(config: config)
+        }
+        .environment(\.defaultMinListRowHeight, 2)
+#if os(macOS)
+        .listStyle(.automatic)
+#else
+        .listStyle(.grouped)
+#endif
+        .refreshable { await self.onUrlChange() }
+        .onAppear {
+            self.isDownloaded = false
+            if let v = self.config.name {
+                self.name = v
+            }
+            if let u = self.config.url {
+                var s = u.absoluteString
+                if s.starts(with: "http://") {
+                    s = String(s.dropFirst(7))
+                }
+                if s.starts(with: "https://") {
+                    s = String(s.dropFirst(8))
+                }
+                self.url = s
+            }
+            if let v = self.config.triggerIntervalUnits {
+                self.intervalUnits = TimeUnit.forTag(tag: v)
+                switch self.intervalUnits {
+                case .Hours, .Days: break
+                default:
+                    self.intervalUnits = .Hours
+                }
+            }
+            if let s = self.config.selector {
+                self.selectors = s
+            }
+            self.resultIndex = "\(self.config.elementIndex + 1)"
+            self.decodeAs = ResultType.from(tag: self.config.resultType ?? "s") ?? ResultType.String
+            self.isWidget = self.config.isWidget
+            Task(priority: .userInitiated) {
+                await self.onUrlChange()
+            }
+        }
+        .onDisappear {
+            config.name = self.name
+            config.url = URL(string: "https://\(self.url)") ?? self.config.url
+            config.triggerInterval = 1
+            config.triggerIntervalUnits = self.intervalUnits.tag()
+            config.selector = self.selectors
+            config.elementIndex = (Int32(self.resultIndex) ?? 1) - 1
+            config.resultType = self.decodeAs.tag()
+            config.isWidget = self.isWidget
+            do {
+                try viewContext.save()
+            } catch {
+                logger.error("failed to save! \(error)")
+            }
+            /*if isWidget {
+                do {
+                    let request = NSFetchRequest<Config>(entityName: "Config")
+                    request.predicate = NSPredicate(format: "id != %@ AND isWidget == TRUE", argumentArray: [config.id!])
+                    let results = try viewContext.fetch(request)
+                    if !results.isEmpty {
+                        results.forEach { e in e.isWidget = false }
+                        try viewContext.save()
+                    }
+                } catch {
+                    logger.error("failed to update isWidget on other configs: \(error)")
+                }
+            }*/
+            Scheduler.shared.scheduleConfigs()
+        }
+    }
+    
+    var configControls: some View {
+        Group {
+            TextField("Name", text: $name)
+#if os(iOS)
+                .textInputAutocapitalization(.words)
+#endif
             VStack(alignment: .leading) {
                 Text("URL").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
                 HStack {
                     Text("https://").foregroundColor(.gray)
                     TextField("URL", text: $url)
+#if os(iOS)
                         .keyboardType(.URL)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
+#endif
                         .onSubmit {
                             if self.url.starts(with: "https://") {
                                 self.url = String(self.url.dropFirst(8))
@@ -110,29 +183,18 @@ struct SelectorView: View, OnCommitHandler {
                 }
             }
             VStack(alignment: .leading) {
-                Text("Refresh Interval").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
                 HStack {
-                    TextField("Frequency", text: $intervalNumber)
-                        .keyboardType(.numberPad)
-                        .autocorrectionDisabled(true)
-                        .onSubmit {
-                            Task(priority: .userInitiated) {
-                                await self.onChange()
-                                
-                            }
-                        }
+                    Text("Refresh").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
                     Picker("", selection: $intervalUnits) {
-                        Text("Seconds").tag(TimeUnit.Seconds)
-                        Text("Minutes").tag(TimeUnit.Minutes)
-                        Text("Hours").tag(TimeUnit.Hours)
-                        Text("Days").tag(TimeUnit.Days)
+                        Text("Hourly").tag(TimeUnit.Hours)
+                        Text("Daily").tag(TimeUnit.Days)
                     }
                 }
             }
             VStack(alignment: .leading) {
                 Text("Selector").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
                 /*TextField("Selector", text: $selectors).autocapitalization(.none).autocorrectionDisabled(true)
-                    .font(.custom("Courier", fixedSize: 16)).multilineTextAlignment(.leading).lineLimit(nil).fixedSize(horizontal: true, vertical: false)
+                 .font(.custom("Courier", fixedSize: 16)).multilineTextAlignment(.leading).lineLimit(nil).fixedSize(horizontal: true, vertical: false)
                  */
                 MultilineTextField(placeholder: "Selector", text: $selectors, onCommit: {
                     Task(priority: .background) {
@@ -144,7 +206,9 @@ struct SelectorView: View, OnCommitHandler {
                 Text("Result Number").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
                 Spacer()
                 TextField("Result", text: $resultIndex)
+#if os(iOS)
                     .keyboardType(.numberPad)
+#endif
                     .frame(width: 42, alignment: .trailing)
                     .onSubmit {
                         Task(priority: .userInitiated) {
@@ -156,7 +220,7 @@ struct SelectorView: View, OnCommitHandler {
                 Text("Decode As").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
                 Spacer()
                 Picker("", selection: $decodeAs) {
-                    Text("Text").tag(ResultType.AttributedString)
+                    Text("Text").tag(ResultType.String)
                     Text("Number").tag(ResultType.Float)
                     Text("Percent").tag(ResultType.Percent)
                     //Text("Image").tag(ResultType.Image)
@@ -181,118 +245,22 @@ struct SelectorView: View, OnCommitHandler {
                             Text("On Change").foregroundColor(.gray)
                         case let .valueIsGreaterThan(value, orEqual):
                             if orEqual {
-                                Text("Greater or Equals \(value)").foregroundColor(.gray)
+                                Text("Greater or Equals \(value.description)").foregroundColor(.gray)
                             } else {
-                                Text("Greater than \(value)").foregroundColor(.gray)
+                                Text("Greater than \(value.description)").foregroundColor(.gray)
                             }
                         case let .valueIsLessThan(value, orEqual):
                             if orEqual {
-                                Text("Less or Equals \(value)").foregroundColor(.gray)
+                                Text("Less or Equals \(value.description)").foregroundColor(.gray)
                             } else {
-                                Text("Less than \(value)").foregroundColor(.gray)
+                                Text("Less than \(value.description)").foregroundColor(.gray)
                             }
                         }
                     }
                 }
             }
-            VStack(alignment: .leading) {
-                Text("Result").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
-                HStack {
-                    Text(resultPreview)
-                    Spacer()
-                    Button(action: {
-                        if self.lastError != nil || self.lastResult == nil {
-                            self.showAlert = true
-                        } else {
-                            self.showAlert = false
-                        }
-                    }) {
-                        Image(uiImage: UIImage(systemName: "exclamationmark.circle")!)
-                            .renderingMode(.original).tint(errorForeground())
-                    }.tint(errorForeground())
-                }
-            }
-            Group {
-                NavigationLink(destination: HistoryView(id: config.id!)) {
-                    Text("Result History").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
-                }
-                VStack(alignment: .leading) {
-                    Text("Preview").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
-                    WebView(webView: webView).aspectRatio(1.33, contentMode: .fill)
-                }
-            }
         }
-        .alert(errorText, isPresented: $showAlert) {
-            Button("OK") {}
-        }
-        .environment(\.defaultMinListRowHeight, 2)
-        .listStyle(.grouped)
-        .refreshable { await self.onUrlChange() }
-        .onAppear {
-            NavigationDelegateImpl.shared.registerListener(listener: self)
-            webView.loadHTMLString(emptyHtml, baseURL: nil)
-            self.isDownloaded = false
-            if let v = self.config.name {
-                self.name = v
-            }
-            if let u = self.config.url {
-                var s = u.absoluteString
-                if s.starts(with: "http://") {
-                    s = String(s.dropFirst(7))
-                }
-                if s.starts(with: "https://") {
-                    s = String(s.dropFirst(8))
-                }
-                self.url = s
-            }
-            if self.config.triggerInterval <= 0 {
-                self.intervalNumber = "1"
-            } else {
-                self.intervalNumber = "\(self.config.triggerInterval)"
-            }
-            if let v = self.config.triggerIntervalUnits {
-                self.intervalUnits = TimeUnit.forTag(tag: v)
-            }
-            if let s = self.config.selector {
-                self.selectors = s
-            }
-            self.resultIndex = "\(self.config.elementIndex + 1)"
-            self.decodeAs = ResultType.from(tag: self.config.resultType ?? "s") ?? ResultType.AttributedString
-            self.isWidget = self.config.isWidget
-            Task(priority: .userInitiated) {
-                await self.onUrlChange()
-            }
-        }
-        .onDisappear {
-            NavigationDelegateImpl.shared.unregisterListener(listener: self)
-            self.config.name = self.name
-            self.config.url = URL(string: "https://\(self.url)") ?? self.config.url
-            self.config.triggerInterval = Int64(self.intervalNumber) ?? self.config.triggerInterval
-            self.config.triggerIntervalUnits = self.intervalUnits.tag()
-            self.config.selector = self.selectors
-            self.config.elementIndex = (Int32(self.resultIndex) ?? 1) - 1
-            self.config.resultType = self.decodeAs.tag()
-            self.config.isWidget = self.isWidget
-            do {
-                try self.viewContext.save()
-            } catch {
-                logger.error("failed to save! \(error)")
-            }
-            if isWidget {
-                do {
-                    let request = NSFetchRequest<Config>(entityName: "Config")
-                    request.predicate = NSPredicate(format: "id != %@ AND isWidget == TRUE", argumentArray: [config.id!])
-                    let results = try viewContext.fetch(request)
-                    if !results.isEmpty {
-                        results.forEach { e in e.isWidget = false }
-                        try viewContext.save()
-                    }
-                } catch {
-                    logger.error("failed to update isWidget on other configs: \(error)")
-                }
-            }
-            Scheduler.shared.scheduleConfigs()
-        }
+
     }
     
     func onUrlChange() async {
@@ -313,25 +281,24 @@ struct SelectorView: View, OnCommitHandler {
                             logger.error("ignoring error deleting \(SelectorView.downloadPath): \(error)")
                         }
                         try FileManager.default.copyItem(at: data, to: SelectorView.downloadPath)
-                        lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i-1, resultType: decodeAs)
+                        lastEncoding = DownloadManager.stringEncoding(response: response)
+                        lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i-1, resultType: decodeAs, documentEncoding: DownloadManager.stringEncoding(response: response))
                         lastError = nil
-                        resultPreview = lastResult?.attributedString ?? AttributedString()
-                        DispatchQueue.main.async {
-                            var request = URLRequest(url: SelectorView.downloadPath, cachePolicy: .reloadIgnoringLocalCacheData)
-                            request.attribution = .user
-                            self.webView.load(request)
-                        }
+                        errorText = ""
+                        resultPreview = lastResult?.description() ?? ""
                     default:
                         isDownloaded = true
                         lastError = ValueSelectorError.HTTPError(statusCode: r.statusCode)
                         lastResult = nil
                         resultPreview = ""
+                        errorText = "Error fetching web page, code \(r.statusCode)."
                     }
                 } else {
                     isDownloaded = true
                     lastError = nil
                     lastResult = nil
                     resultPreview = ""
+                    errorText = "Unexpected response retrieving web page."
                 }
             } catch {
                 do {
@@ -343,18 +310,18 @@ struct SelectorView: View, OnCommitHandler {
                 lastError = error
                 lastResult = nil
                 resultPreview = ""
+                errorText = error.localizedDescription
             }
         }
     }
     
     func onChange() async {
         if isDownloaded {
-            self.highlightWebView()
             if let s = selectors.notBlank(), let i = Int(resultIndex) {
                 do {
-                    lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i-1, resultType: decodeAs)
+                    lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i-1, resultType: decodeAs, documentEncoding: lastEncoding)
                     lastError = nil
-                    resultPreview = lastResult?.attributedString ?? AttributedString()
+                    resultPreview = lastResult?.description() ?? ""
                 } catch {
                     lastResult = nil
                     lastError = error
@@ -374,62 +341,6 @@ struct SelectorView: View, OnCommitHandler {
             return .yellow
         }
         return .clear
-    }
-    
-    func doRefresh() {
-    }
-    
-    func highlightWebView() {
-        if let s = self.selectors.notBlank(), let i = Int(self.resultIndex) {
-            let clearCode: String
-            if let prev = self.highlightedSelectors {
-                clearCode = """
-var oldElement = document.querySelectorAll("\(prev)")[\(i - 1)];
-if (oldElement) {
-  oldElement.style.outline = null;
-  oldElement.style.boxShadow = null;
-}
-"""
-            } else {
-                clearCode = ""
-            }
-            let jsCode = """
-\(clearCode)
-var element = document.querySelectorAll("\(s)")[\(i - 1)];
-if (element) {
-  element.style.outline = "10000vmax solid rgba(0, 0, 0, .5)";
-  //element.style.boxShadow = "0 0 0 1000vmax rgba(0, 0, 0, .5)";
-}
-"""
-            // logger.debug("evaluating javascript: \(jsCode)")
-            webView.evaluateJavaScript(jsCode) { result, error in
-                logger.notice("JS highlighter execution result \(String(describing: result)) error \(error)")
-            }
-            self.highlightedSelectors = self.selectors
-        }
-    }
-
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        highlightWebView()
-    }
-    
-    func onCommit(webView: WKWebView) {
-        /*if firstLoad {
-            DispatchQueue.main.async {
-                var request = URLRequest(url: SelectorView.downloadPath, cachePolicy: .reloadIgnoringLocalCacheData)
-                request.attribution = .user
-                self.webView.load(request)
-            }
-            firstLoad = false
-        } else {*/
-            Task(operation: onChange)
-        //
-        
-    //}
-    }
-    
-    func isEqual(that: OnCommitHandler) -> Bool {
-        return id == that.id
     }
 }
 

@@ -20,19 +20,31 @@ struct ContentView: View {
         NavigationStack {
             List {
                 ForEach(configs) { config in
-                    NavigationLink(config.name ?? "", value: config)
+                    NavigationLink(destination: SelectorView(config: config)) {
+                        HStack {
+                            Text(config.name ?? "")
+                            Spacer()
+                            Text(config.result?.description() ?? "").foregroundColor(.gray)
+                        }
+                    }
                 }
                 .onDelete(perform: deleteItems)
                 .onMove(perform: moveItems)
             }
-            .navigationDestination(for: Config.self) { config in
-                SelectorView(config: config)
-            }
+            //.navigationDestination(for: Config.self) { config in
+            //    SelectorView(config: config)
+            //}
+#if os(macOS)
+            .listStyle(.automatic)
+#else
             .listStyle(.grouped)
+#endif
             .toolbar {
+#if os(iOS)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }
+#endif
                 ToolbarItem {
                     Button(action: addItem) {
                         Label("New", systemImage: "plus")
@@ -44,10 +56,11 @@ struct ContentView: View {
                 NavigationLink("Debug Logs", value: true)
             }.navigationDestination(for: Bool.self) { _ in LogsView() }
 #endif
-            if UIDevice.current.localizedModel == "iPhone" {
-                Text("Selektor")
-            }
+            Text("Selektor")
         }
+#if os(macOS)
+        .frame(width: 300, height: 600)
+#endif
     }
 
     private func addItem() {

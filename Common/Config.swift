@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftMsgpack
+import SwiftMsgpackCsm
 
 extension Int64 {
     func positive() -> Int64 {
@@ -24,6 +24,7 @@ extension Config {
             let decoder = MsgPackDecoder()
             if let encoded = self.lastValue {
                 do {
+                    logger.debug("decoding value \(encoded.base64EncodedString())")
                     return try decoder.decode(Result.self, from: encoded)
                 } catch {
                     logger.error("failed to decode lastResult \(encoded.description): \(error)")
@@ -53,16 +54,16 @@ extension Config {
     
     var alertType: AlertType {
         get {
-            return AlertType.alertType(forTag: self.alertTypeTag, compareValue: self.alertCompareValue, orEquals: self.alertOrEquals)
+            return AlertType.alertType(forTag: self.alertTypeTag, compareValue: self.alertCompareValue as! Decimal, orEquals: self.alertOrEquals)
         }
         set {
             self.alertTypeTag = newValue.tag
             switch newValue {
             case let .valueIsGreaterThan(value, orEquals):
-                self.alertCompareValue = value
+                self.alertCompareValue = (value) as NSDecimalNumber
                 self.alertOrEquals = orEquals
             case let .valueIsLessThan(value, orEquals):
-                self.alertCompareValue = value
+                self.alertCompareValue = (value) as NSDecimalNumber
                 self.alertOrEquals = orEquals
             default:
                 break

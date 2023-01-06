@@ -60,4 +60,22 @@ struct PersistenceController {
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
+    
+    static func checkConfigToRun() throws -> Config? {
+        logger.info("checking if anything to refresh")
+        let viewContext = PersistenceController.shared.container.viewContext
+        let request = NSFetchRequest<Config>(entityName: "Config")
+        let results = try viewContext.fetch(request)
+        logger.debug("fetched configs \(results.count), \(results.map { r in "name: \(r.name) lastFetch: \(r.lastFetch) nextFireDate: \(r.nextFireDate) id: \(r.id) selector: \(r.selector) resultType: \(r.resultType)" })")
+        let result = results.sorted {
+            a, b in a.nextFireDate < b.nextFireDate
+        }.first { config in
+            config.url != nil && config.id != nil && config.selector?.notBlank() != nil && config.resultType != nil
+        }
+        logger.debug("next selector is \(result?.name ?? "<nil>") next fire date \(result?.nextFireDate)")
+        if let r = result, r.nextFireDate <= Date() {
+            return r
+        }
+        return nil
+    }
 }

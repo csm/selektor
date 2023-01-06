@@ -12,6 +12,7 @@ struct HistoryView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     let id: UUID
+    let name: String
     @State var history: [History] = []
     
     static let dateFormatter: DateFormatter = {
@@ -22,11 +23,13 @@ struct HistoryView: View {
     }()
     
     var body: some View {
+        Text(name).font(.title)
         List {
             ForEach(history) { e in
-                VStack(alignment: .leading) {
+                HStack(alignment: .center) {
                     Text("\(e.date ?? Date(), formatter: HistoryView.dateFormatter)")
                         .font(.system(size: 12, weight: .black).lowercaseSmallCaps())
+                    Spacer()
                     if let err = e.error {
                         Text(err).foregroundColor(.red)
                     } else {
@@ -50,6 +53,6 @@ struct HistoryView: View {
 
 struct HistoryView_Previews: PreviewProvider {
     static var previews: some View {
-        HistoryView(id: UUID())
+        HistoryView(id: UUID(), name: "Example")
     }
 }

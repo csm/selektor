@@ -10,11 +10,27 @@ import SwiftUI
 import Intents
 import CoreData
 
+@main
+struct SelektorWidgets: WidgetBundle {
+    init() {
+    }
+    
+    @WidgetBundleBuilder
+    var body: some Widget {
+        SelektorWidget(0)
+        SelektorWidget(1)
+        SelektorWidget(2)
+        SelektorWidget(3)
+    }
+}
+
 struct Provider: IntentTimelineProvider {
     var managedObjectContext: NSManagedObjectContext
+    let configIndex: Int
 
-    init(context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext, configIndex: Int) {
         self.managedObjectContext = context
+        self.configIndex = configIndex
     }
     
     func placeholder(in context: Context) -> SimpleEntry {
@@ -48,14 +64,13 @@ struct Provider: IntentTimelineProvider {
         logger.notice("fetching entry...")
         let request = NSFetchRequest<Config>(entityName: "Config")
         request.predicate = NSPredicate(format: "isWidget == TRUE")
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \Config.index, ascending: true)]
         let entries = try managedObjectContext.fetch(request)
         logger.notice("got entries \(entries) with isWidget == TRUE")
-        if !entries.isEmpty {
+        if let config = entries.dropFirst(configIndex).first {
             return SimpleEntry(
-                date: Date(),
-                results: entries.map { entry in
-                    ResultEntry(date: entry.lastFetch ?? Date(), text: entry.result?.description() ?? "--", label: entry.name ?? "")
-                },
+                date: config.lastFetch ?? Date(),
+                results: [ResultEntry(date: config.lastFetch ?? Date(), text: config.result?.description() ?? "--", label: config.name ?? "")],
                 configuration: configuration
             )
         }
@@ -66,8 +81,9 @@ struct Provider: IntentTimelineProvider {
         logger.notice("fetching entries...")
         let configRequest = NSFetchRequest<Config>(entityName: "Config")
         configRequest.predicate = NSPredicate(format: "isWidget == TRUE")
+        configRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Config.index, ascending: true)]
         let entries = try managedObjectContext.fetch(configRequest)
-        if let config = entries.first, let id = config.id {
+        if let config = entries.dropFirst(configIndex).first, let id = config.id {
             let request = NSFetchRequest<History>(entityName: "History")
             request.predicate = NSPredicate(format: "configId == %@", argumentArray: [id])
             request.sortDescriptors = [NSSortDescriptor(keyPath: \History.date, ascending: false)]
@@ -112,9 +128,24 @@ let dateFormatter = {
 struct SelektorWidgetsEntryView : View {
     var entry: Provider.Entry
 
+    @Environment(\.widgetFamily) var family
+    
     var body: some View {
-        //TabView() {
-            VStack {
+        VStack {
+            switch family {
+            case .accessoryInline, .accessoryCircular, .accessoryRectangular:
+                if let r = entry.results.first {
+                    VStack(alignment: .center) {
+                        Spacer()
+                        Text(r.label).minimumScaleFactor(0.1)
+                        Spacer()
+                        Text(r.text)
+                        Spacer()
+                    }
+                } else {
+                    Text("--")
+                }
+            default:
                 ForEach(entry.results) { result in
                     VStack {
                         Spacer()
@@ -127,20 +158,46 @@ struct SelektorWidgetsEntryView : View {
                     }
                 }
             }
-        //}.tabViewStyle(.page)
+        }
     }
 }
 
-@main
-struct SelektorWidgets: Widget {
+struct SelektorWidget: Widget {
     let kind: String = "SelektorWidgets"
+    let configIndex: Int
 
+    init() {
+        self.configIndex = 0
+    }
+    
+    init(_ configIndex: Int) {
+        self.configIndex = configIndex
+    }
+    
     var body: some WidgetConfiguration {
-        IntentConfiguration(kind: kind, intent: ConfigurationIntent.self, provider: Provider(context: PersistenceController.shared.container.viewContext)) { entry in
+        IntentConfiguration(kind: kind, intent: ConfigurationIntent.self, provider: Provider(context: PersistenceController.shared.container.viewContext, configIndex: configIndex)) { entry in
             SelektorWidgetsEntryView(entry: entry)
         }
         .configurationDisplayName("Selektor")
         .description("Widget showing selected values from a web page.")
+#if os(iOS)
+        .supportedFamilies([
+            .accessoryInline,
+            .accessoryCircular,
+            .accessoryRectangular,
+            .systemSmall,
+            .systemMedium,
+            .systemLarge,
+            .systemExtraLarge
+        ])
+#else
+        .supportedFamilies([
+            .systemSmall,
+            .systemMedium,
+            .systemLarge,
+            .systemExtraLarge
+        ])
+#endif
     }
 }
 

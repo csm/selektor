@@ -22,9 +22,14 @@ struct MultilineTextField: View {
     }
     
     var body: some View {
+#if os(macOS)
+        NSTextViewWrapper(text: self.internalText, calculatedHeight: $viewHeight, onDone: onCommit)
+            .frame(minHeight: viewHeight, maxHeight: viewHeight)
+#else
         UITextViewWrapper(text: self.internalText, calculatedHeight: $viewHeight, onDone: onCommit)
             .frame(minHeight: viewHeight, maxHeight: viewHeight)
             .background(placeholderView, alignment: .topLeading)
+#endif
     }
     
     init(placeholder: String, text: Binding<String>, onCommit: (() -> Void)? = nil) {

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftMsgpack
+import SwiftMsgpackCsm
 
 extension Config {
     func getLastValue() -> Result? {

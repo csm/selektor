@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 struct AlertConfigView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -17,9 +18,11 @@ struct AlertConfigView: View {
     
     var body: some View {
         VStack {
+#if os(iOS)
             HStack(alignment: .center) {
                 Text("Alert Config").font(.system(size: 18, weight: .black).lowercaseSmallCaps())
             }
+#endif
             List {
                 Section {
                     HStack {
@@ -99,9 +102,11 @@ struct AlertConfigView: View {
                         case let .valueIsGreaterThan(_, equals):
                             HStack {
                                 TextField("value", text: $compareAmount)
+#if os(iOS)
                                     .keyboardType(.numberPad)
+#endif
                                     .onSubmit {
-                                        if let f = Float(compareAmount) {
+                                        if let f = Decimal(string: compareAmount) {
                                             alertType = .valueIsGreaterThan(value: f, orEquals: equals)
                                         }
                                     }
@@ -160,9 +165,11 @@ struct AlertConfigView: View {
                         case let .valueIsLessThan(_, equals):
                             HStack {
                                 TextField("value", text: $compareAmount)
+#if os(iOS)
                                     .keyboardType(.numberPad)
+#endif
                                     .onSubmit {
-                                        if let f = Float(compareAmount) {
+                                        if let f = Decimal(string: compareAmount) {
                                             alertType = .valueIsLessThan(value: f, orEquals: equals)
                                         }
                                     }.frame(maxWidth: 30, alignment: .trailing)
