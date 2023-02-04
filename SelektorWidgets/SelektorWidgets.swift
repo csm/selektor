@@ -195,7 +195,6 @@ struct SelektorWidget: Widget {
             .systemSmall,
             .systemMedium,
             .systemLarge,
-            .systemExtraLarge
         ])
 #endif
     }

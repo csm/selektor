@@ -10,6 +10,7 @@ import UserNotifications
 
 struct AlertConfigView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
     
     @ObservedObject var config: Config
     
@@ -36,9 +37,7 @@ struct AlertConfigView: View {
                         default: EmptyView()
                         }
                     }.onTapGesture {
-                        withAnimation {
-                            alertType = .none
-                        }
+                        alertType = .none
                     }
                     
                     HStack {
@@ -56,9 +55,7 @@ struct AlertConfigView: View {
                             do {
                                 if try await checkNotificationPermission() {
                                     DispatchQueue.main.async {
-                                        withAnimation {
-                                            alertType = .everyTime
-                                        }
+                                        alertType = .everyTime
                                     }
                                 }
                             } catch {
@@ -84,9 +81,7 @@ struct AlertConfigView: View {
                             do {
                                 if try await checkNotificationPermission() {
                                     DispatchQueue.main.async {
-                                        withAnimation {
-                                            alertType = .valueChanged
-                                        }
+                                        alertType = .valueChanged
                                     }
                                 }
                             } catch {
@@ -109,7 +104,7 @@ struct AlertConfigView: View {
                                         if let f = Decimal(string: compareAmount) {
                                             alertType = .valueIsGreaterThan(value: f, orEquals: equals)
                                         }
-                                    }
+                                    }.frame(maxWidth: 30, alignment: .trailing)
                                 Image(systemName: "checkmark")
                                     .frame(width: 12, height: 12)
                             }
@@ -124,10 +119,8 @@ struct AlertConfigView: View {
                                 do {
                                     if try await checkNotificationPermission() {
                                         DispatchQueue.main.async {
-                                            withAnimation {
-                                                compareAmount = "0"
-                                                alertType = .valueIsGreaterThan(value: 0.0)
-                                            }
+                                            compareAmount = "0"
+                                            alertType = .valueIsGreaterThan(value: 0.0)
                                         }
                                     }
                                 } catch {
@@ -150,9 +143,7 @@ struct AlertConfigView: View {
                                 EmptyView()
                             }
                         }.onTapGesture {
-                            withAnimation {
-                                alertType = .valueIsGreaterThan(value: value, orEquals: !equals)
-                            }
+                            alertType = .valueIsGreaterThan(value: value, orEquals: !equals)
                         }
                     default:
                         EmptyView()
@@ -188,10 +179,8 @@ struct AlertConfigView: View {
                                 do {
                                     if try await checkNotificationPermission() {
                                         DispatchQueue.main.async {
-                                            withAnimation {
-                                                compareAmount = "0"
-                                                alertType = .valueIsLessThan(value: 0.0)
-                                            }
+                                            compareAmount = "0"
+                                            alertType = .valueIsLessThan(value: 0.0)
                                         }
                                     }
                                 } catch {
@@ -223,13 +212,34 @@ struct AlertConfigView: View {
                 
                 Section {
                     Toggle("Play Sound", isOn: $config.alertSound).toggleStyle(.switch)
+                    Toggle("Time Sensitive", isOn: $config.alertTimeSensitive).toggleStyle(.switch)
                 }
             }.onAppear {
                 alertType = config.alertType
             }.onDisappear {
                 config.alertType = alertType
             }
+#if os(macOS)
+            .listStyle(.bordered(alternatesRowBackgrounds: true))
+#endif
+#if os(macOS)
+            HStack {
+                Spacer()
+                Button("Cancel") {
+                    print("cancel")
+                    dismiss()
+                }
+                Button("OK") {
+                    print("ok TODO save values")
+                    config.alertType = alertType
+                    dismiss()
+                }
+            }
+#endif
         }
+#if os(macOS)
+        .frame(width: 250, height: 225)
+#endif
     }
     
     func checkNotificationPermission() async throws -> Bool {

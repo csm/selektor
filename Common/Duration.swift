@@ -26,15 +26,15 @@ enum TimeUnit {
         }
     }
     
-    static func forTag(tag: String) -> TimeUnit {
-        if tag == "m" {
-            return .Minutes
+    static func forTag(tag: String?) -> TimeUnit {
+        if tag == "s" {
+            return .Seconds
         } else if tag == "h" {
             return .Hours
         } else if tag == "d" {
             return .Days
         } else {
-            return .Seconds
+            return .Minutes
         }
     }
     

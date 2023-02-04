@@ -35,10 +35,15 @@
 			<key>orderHint</key>
 			<integer>5</integer>
 		</dict>
-		<key>SelektorWatchApp Watch App.xcscheme_^#shared#^_</key>
+		<key>SelektorMacWidgetsExtension.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>4</integer>
+		</dict>
+		<key>SelektorWatchApp Watch App.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
 		</dict>
 		<key>SelektorWatchExtension.xcscheme_^#shared#^_</key>
 		<dict>
@@ -58,6 +63,26 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>701849952974C41900EFC53D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>706807702963E7F80013AE63</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>706807852963E7FA0013AE63</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>7068078F2963E7FB0013AE63</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>70C18E1B293678E9009C09D0</key>
 		<dict>
 			<key>primary</key>

@@ -21,10 +21,14 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
-                                                <segue destination="vnd-PA-YOS" kind="modal" id="Txi-fQ-xC0"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
+                                        <menuItem title="Subscribe..." id="Hef-pJ-Yfo">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="openSubscription:" target="Voe-Tx-rLC" id="xOc-HN-TLv"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Settings…" id="BOF-NM-1cW" userLabel="Settings…">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
@@ -64,14 +68,14 @@
         <!--Window Controller-->
         <scene sceneID="154-Dy-Ftj">
             <objects>
-                <windowController id="vnd-PA-YOS" sceneMemberID="viewController">
-                    <window key="window" title="Selektor" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" toolbarStyle="compact" id="LyA-lP-ZSP">
+                <windowController showSeguePresentationStyle="single" id="vnd-PA-YOS" sceneMemberID="viewController">
+                    <window key="window" title="Selektor" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" toolbarStyle="compact" titleVisibility="hidden" id="LyA-lP-ZSP">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-                        <rect key="contentRect" x="196" y="239" width="480" height="270"/>
+                        <rect key="contentRect" x="486" y="329" width="480" height="235"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1440" height="875"/>
                         <view key="contentView" id="96i-cB-zq9">
-                            <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="235"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </view>
                         <connections>
@@ -94,30 +98,39 @@
                         <rect key="frame" x="0.0" y="0.0" width="321" height="270"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="8iw-pB-bG0">
-                                <rect key="frame" x="133" y="127" width="55" height="16"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="16" id="Fre-7A-OPh"/>
-                                    <constraint firstAttribute="width" constant="51" id="TZR-Ve-qJl"/>
-                                </constraints>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="8iw-pB-bG0">
+                                <rect key="frame" x="18" y="219" width="285" height="31"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Selektor" id="AAi-YV-uIX">
-                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <font key="font" textStyle="largeTitle" name=".SFNS-Regular"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rbD-EA-qSa">
+                                <rect key="frame" x="18" y="195" width="285" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="Copyright © 2023 Casey Marshall" id="lsa-U7-2MA">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KmZ-GL-oyU">
+                                <rect key="frame" x="18" y="171" width="285" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="truncatingTail" selectable="YES" title="https://selektor.app/" allowsEditingTextAttributes="YES" id="Akf-Rp-3z6">
+                                    <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
                         </subviews>
-                        <constraints>
-                            <constraint firstAttribute="bottom" secondItem="8iw-pB-bG0" secondAttribute="bottom" constant="127" id="91c-Ys-DJW"/>
-                            <constraint firstItem="8iw-pB-bG0" firstAttribute="leading" secondItem="htz-ZS-GJk" secondAttribute="leading" constant="135" id="PGa-vP-Pp1"/>
-                            <constraint firstItem="8iw-pB-bG0" firstAttribute="top" secondItem="htz-ZS-GJk" secondAttribute="top" constant="127" id="ZwP-Ud-f59"/>
-                            <constraint firstAttribute="trailing" secondItem="8iw-pB-bG0" secondAttribute="trailing" constant="135" id="d4L-01-gjB"/>
-                        </constraints>
                     </view>
                 </viewController>
                 <customObject id="RjD-c5-cOe" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="150.5" y="-659"/>
+            <point key="canvasLocation" x="191" y="-634"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="IcG-8g-DFr">

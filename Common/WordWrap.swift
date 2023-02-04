@@ -20,15 +20,15 @@ func wordWrap(_ text: String, limit: CGFloat, font: NSFont) -> [String] {
         }
         let attributedString = NSAttributedString(string: currentResult, attributes: [.font: font])
         let rect = attributedString.boundingRect(with: NSSize(width: CGFloat.greatestFiniteMagnitude, height: font.capHeight))
-        print("\"\(currentResult)\" bounds: \(rect)")
+        //print("\"\(currentResult)\" bounds: \(rect)")
         if rect.width >= limit {
-            print("insert word break")
+            //print("insert word break")
             if currentResult.count == 0 {
-                print("word break full next result")
+                //print("word break full next result")
                 results.append(nextResult)
                 currentResult = ""
             } else {
-                print("word break before current word")
+                //print("word break before current word")
                 results.append(currentResult)
                 currentResult = String(word)
             }

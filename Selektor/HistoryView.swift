@@ -22,13 +22,15 @@ struct HistoryView: View {
         return f
     }()
     
+    let dateFont = Font.headline
+    
     var body: some View {
-        Text(name).font(.title)
+        Text(name).font(.title2)
         List {
             ForEach(history) { e in
                 HStack(alignment: .center) {
                     Text("\(e.date ?? Date(), formatter: HistoryView.dateFormatter)")
-                        .font(.system(size: 12, weight: .black).lowercaseSmallCaps())
+                        .font(dateFont)
                     Spacer()
                     if let err = e.error {
                         Text(err).foregroundColor(.red)

@@ -23,13 +23,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     override func awakeFromNib() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem?.button?.title = "Selektor"
-        statusItem?.button?.image = NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: nil)
+        //statusItem?.button?.title = "Selektor"
+        let menuImage = NSImage(named: "menuicon")
+        menuImage?.isTemplate = true
+        statusItem?.button?.image = menuImage
+        //statusItem?.button?.image = NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: nil)
         statusItem?.menu = menu
+        Task() {
+            await SubscriptionManager.shared.loadData()
+        }
     }
     
     @objc func menuNeedsUpdate(_ menu: NSMenu) {
-        logger.debug("menuNeedsUpdate \(menu) \(menu == self.menu)")
         if menu == self.menu {
             let viewContext = PersistenceController.shared.container.viewContext
             let fetchRequest = NSFetchRequest<Config>(entityName: "Config")
@@ -100,7 +105,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                             break
                         }
                         item.target = self
-                        var style = NSMutableParagraphStyle()
+                        let style = NSMutableParagraphStyle()
                         let itemWidth: CGFloat = 300
                         style.tabStops = [
                             NSTextTab(textAlignment: .left, location: 0),
@@ -123,7 +128,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                         }.joined(separator: "\r")
                         let attributeRanges = attributeRanges(for: nameContentPadded, and: resultContentPadded, leftAttributes: attributes, rightAttributes: attributes2)
                         //slet content = "\(config.name ?? "")\t\(config.result?.description() ?? "")\nThis is just\tSome test text"
-                        var attributedString = NSMutableAttributedString(string: content)
+                        let attributedString = NSMutableAttributedString(string: content)
                         attributedString.addAttribute(.paragraphStyle, value: style, range: NSRange(location: 0, length: content.count - 1))
                         for (attributes, range) in attributeRanges {
                             attributedString.addAttributes(attributes, range: range)
@@ -138,8 +143,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             } catch {
                 logger.error("error fetching configs: \(error)")
             }
+#if DEBUG
+            menu.addItem(NSMenuItem(title: "Debug Logs", action: #selector(showDebugLogs(_:)), keyEquivalent: ""))
+#endif
             keepItems.forEach(menu.addItem(_:))
         }
+    }
+    
+    @objc func showDebugLogs(_ sender: Any?) {
+        LogsView().openWindow(with: "Debug Logs", level: .modalPanel, size: CGSize(width: 4808, height: 640))
     }
     
     @IBAction
@@ -147,6 +159,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         SettingsView()
             .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
             .openWindow(with: "Selektor", level: .modalPanel, size: CGSize(width: 640, height: 480))
+    }
+    
+    @IBAction
+    @objc func openSubscription(_ sender: Any?) {
+        SubscribeView().padding(.all).openWindow(
+            with: "Selektor",
+            level: .modalPanel,
+            size: CGSize(width: 314, height: 256)
+        )
     }
     
     func configEntryClicked(_ sender: Any?, index: Int) {

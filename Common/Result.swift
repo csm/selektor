@@ -75,7 +75,7 @@ enum Result : Codable, Equatable {
     
     func description() -> String {
         switch self {
-        case let .StringResult(string: s): return s
+        case let .StringResult(string: s): return s.trimmingCharacters(in: .whitespaces)
         case let .AttributedStringResult(string: s): return String(s.characters)
         case let .IntegerResult(integer: i): return "\(i)"
         case let .FloatResult(float: f): return "\(f)"

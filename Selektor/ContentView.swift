@@ -15,6 +15,7 @@ struct ContentView: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Config.index, ascending: true)],
         animation: .default)
     private var configs: FetchedResults<Config>
+    @State var showSubscriptionView: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -34,17 +35,11 @@ struct ContentView: View {
             //.navigationDestination(for: Config.self) { config in
             //    SelectorView(config: config)
             //}
-#if os(macOS)
-            .listStyle(.automatic)
-#else
             .listStyle(.grouped)
-#endif
             .toolbar {
-#if os(iOS)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }
-#endif
                 ToolbarItem {
                     Button(action: addItem) {
                         Label("New", systemImage: "plus")
@@ -56,11 +51,12 @@ struct ContentView: View {
                 NavigationLink("Debug Logs", value: true)
             }.navigationDestination(for: Bool.self) { _ in LogsView() }
 #endif
-            Text("Selektor")
+            Text("Selektor").onTapGesture {
+                showSubscriptionView = true
+            }
+        }.sheet(isPresented: $showSubscriptionView, onDismiss: { showSubscriptionView = false}) {
+            SubscribeView().padding(.all)
         }
-#if os(macOS)
-        .frame(width: 300, height: 600)
-#endif
     }
 
     private func addItem() {
@@ -68,6 +64,9 @@ struct ContentView: View {
         newItem.index = (configs.map(\.index).max() ?? -1) + 1
         newItem.name = "New Config"
         newItem.id = UUID()
+        newItem.triggerInterval = 1
+        newItem.triggerIntervalUnits = TimeUnit.Hours.tag()
+        newItem.resultTypeValue = .String
         var i = 1
         while configs.first(where: { c in c.name == newItem.name }) != nil {
             i += 1

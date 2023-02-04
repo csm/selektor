@@ -15,20 +15,12 @@ struct SelectorView: View {
     
     @ObservedObject var config: Config
     
-    @State var name: String = ""
-    @State var url: String = ""
-    @State var intervalNumber: String = "1"
-    @State var intervalUnits: TimeUnit = .Days
-    @State var selectors: String = ""
     @State var highlightedSelectors: String? = nil
-    @State var resultIndex: String = "1"
-    @State var decodeAs: ResultType = .String
     @State var lastResult: Result? = Result.StringResult(string: "")
     @State var resultPreview: String = ""
     @State var lastError: Error? = nil
     @State var showAlert: Bool = false
     @State var errorText: String = ""
-    @State var isWidget: Bool = false
     @State var wasUpdated: Bool = false
     @State var isDownloaded: Bool = false
     @State var showPreview: Bool = false
@@ -38,21 +30,21 @@ struct SelectorView: View {
         return userDirUrl.appendingPathComponent("selektor-data.html")
     }()
     @State var lastEncoding: String.Encoding = .utf8
+    @ObservedObject var subscriptionManager: SubscriptionManager = SubscriptionManager.shared
+    @State var showSubscriptionSheet: Bool = false
     
     let id = UUID().uuidString
     
+    // .system(size: 16, weight: .black).lowercaseSmallCaps()
+    let largeLabelFont = Font.headline
+    let smallLabelFont = Font.subheadline
+
     var body: some View {
         List {
-#if os(macOS)
-            HStack {
-                Button("Back") {
-                    self.presentationMode.wrappedValue.dismiss()
-                }
-            }
-#endif
             self.configControls
+            self.configControls2
             VStack(alignment: .leading) {
-                Text("Result Preview").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
+                Text("Result Preview").font(smallLabelFont)
                 HStack {
                     Text(resultPreview)
                     Spacer()
@@ -69,10 +61,10 @@ struct SelectorView: View {
             }
             Group {
                 NavigationLink(destination: HistoryView(id: config.id!, name: config.name!)) {
-                    Text("Result History").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
+                    Text("Result History").font(largeLabelFont)
                 }
                 Button(action: { showPreview = true }) {
-                    Text("Preview").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
+                    Text("Show Browser").font(largeLabelFont)
                 }.foregroundColor(.primary)
             }
         }
@@ -81,63 +73,35 @@ struct SelectorView: View {
         }
         .sheet(isPresented: $showPreview, onDismiss: {
             showPreview = false
-            self.selectors = config.selector ?? ""
         }) {
             SelectorPreviewView(config: config)
         }
+        .sheet(isPresented: $showSubscriptionSheet, onDismiss: {
+            showSubscriptionSheet = false
+        }) {
+            SubscribeView().padding(.all)
+        }
         .environment(\.defaultMinListRowHeight, 2)
-#if os(macOS)
-        .listStyle(.automatic)
-#else
         .listStyle(.grouped)
-#endif
         .refreshable { await self.onUrlChange() }
         .onAppear {
             self.isDownloaded = false
-            if let v = self.config.name {
-                self.name = v
-            }
-            if let u = self.config.url {
-                var s = u.absoluteString
-                if s.starts(with: "http://") {
-                    s = String(s.dropFirst(7))
-                }
-                if s.starts(with: "https://") {
-                    s = String(s.dropFirst(8))
-                }
-                self.url = s
-            }
-            if let v = self.config.triggerIntervalUnits {
-                self.intervalUnits = TimeUnit.forTag(tag: v)
-                switch self.intervalUnits {
-                case .Hours, .Days: break
-                default:
-                    self.intervalUnits = .Hours
-                }
-            }
-            if let s = self.config.selector {
-                self.selectors = s
-            }
-            self.resultIndex = "\(self.config.elementIndex + 1)"
-            self.decodeAs = ResultType.from(tag: self.config.resultType ?? "s") ?? ResultType.String
-            self.isWidget = self.config.isWidget
             Task(priority: .userInitiated) {
                 await self.onUrlChange()
             }
         }
         .onDisappear {
-            config.name = self.name
-            config.url = URL(string: "https://\(self.url)") ?? self.config.url
-            config.triggerInterval = 1
-            config.triggerIntervalUnits = self.intervalUnits.tag()
-            config.selector = self.selectors
-            config.elementIndex = (Int32(self.resultIndex) ?? 1) - 1
-            config.resultType = self.decodeAs.tag()
-            config.isWidget = self.isWidget
             do {
                 try viewContext.save()
             } catch {
                 logger.error("failed to save! \(error)")
+            }
+            Task() {
+                do {
+                    try await PushManager.shared.updateSchedules()
+                } catch {
+                    logger.error("failed to upload schedules: \(error)")
+                }
             }
             /*if isWidget {
                 do {
@@ -158,24 +122,17 @@ struct SelectorView: View {
     
     var configControls: some View {
         Group {
-            TextField("Name", text: $name)
-#if os(iOS)
+            TextField("Name", text: ($config.name).safeBinding(defaultValue: ""))
                 .textInputAutocapitalization(.words)
-#endif
             VStack(alignment: .leading) {
-                Text("URL").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
+                Text("URL").font(smallLabelFont)
                 HStack {
                     Text("https://").foregroundColor(.gray)
-                    TextField("URL", text: $url)
-#if os(iOS)
+                    TextField("URL", text: ($config.url).stringBinding())
                         .keyboardType(.URL)
                         .autocorrectionDisabled(true)
                         .textInputAutocapitalization(.never)
-#endif
                         .onSubmit {
-                            if self.url.starts(with: "https://") {
-                                self.url = String(self.url.dropFirst(8))
-                            }
                             Task(priority: .userInitiated) {
                                 await self.onUrlChange()
                             }
@@ -184,31 +141,30 @@ struct SelectorView: View {
             }
             VStack(alignment: .leading) {
                 HStack {
-                    Text("Refresh").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
-                    Picker("", selection: $intervalUnits) {
+                    Text("Refresh").font(largeLabelFont)
+                    Picker("", selection: ($config.triggerIntervalUnits).timeUnitBinding()) {
                         Text("Hourly").tag(TimeUnit.Hours)
                         Text("Daily").tag(TimeUnit.Days)
+                    }.disabled(!subscriptionManager.isSubscribed)
+                }.onTapGesture {
+                    if !subscriptionManager.isSubscribed {
+                        showSubscriptionSheet = true
                     }
                 }
             }
             VStack(alignment: .leading) {
-                Text("Selector").font(.system(size: 12, weight: .black).lowercaseSmallCaps())
-                /*TextField("Selector", text: $selectors).autocapitalization(.none).autocorrectionDisabled(true)
-                 .font(.custom("Courier", fixedSize: 16)).multilineTextAlignment(.leading).lineLimit(nil).fixedSize(horizontal: true, vertical: false)
-                 */
-                MultilineTextField(placeholder: "Selector", text: $selectors, onCommit: {
+                Text("Selector").font(largeLabelFont)
+                MultilineTextField(placeholder: "Selector", text: ($config.selector).safeBinding(defaultValue: ""), onCommit: {
                     Task(priority: .background) {
                         await self.onChange()
                     }
                 })
             }
             HStack {
-                Text("Result Number").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
+                Text("Result Number").font(largeLabelFont)
                 Spacer()
-                TextField("Result", text: $resultIndex)
-#if os(iOS)
+                TextField("Result", text: ($config.elementIndex).oneBasedStringBinding())
                     .keyboardType(.numberPad)
-#endif
                     .frame(width: 42, alignment: .trailing)
                     .onSubmit {
                         Task(priority: .userInitiated) {
@@ -216,10 +172,15 @@ struct SelectorView: View {
                         }
                     }
             }
+        }
+    }
+    
+    var configControls2: some View {
+        Group {
             HStack {
-                Text("Decode As").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
+                Text("Decode As").font(largeLabelFont)
                 Spacer()
-                Picker("", selection: $decodeAs) {
+                Picker("", selection: ($config.resultType).resultTypeBinding()) {
                     Text("Text").tag(ResultType.String)
                     Text("Number").tag(ResultType.Float)
                     Text("Percent").tag(ResultType.Percent)
@@ -230,33 +191,51 @@ struct SelectorView: View {
                     }
                 }
             }
-            Toggle("Show In Widget", isOn: $isWidget).toggleStyle(.switch).font(.system(size: 16, weight: .black).lowercaseSmallCaps())
-            HStack {
-                NavigationLink(destination: AlertConfigView(config: config)) {
-                    HStack {
-                        Text("Alerts").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
-                        Spacer()
-                        switch config.alertType {
-                        case .none:
-                            Text("None").foregroundColor(.gray)
-                        case .everyTime:
-                            Text("Every Time").foregroundColor(.gray)
-                        case .valueChanged:
-                            Text("On Change").foregroundColor(.gray)
-                        case let .valueIsGreaterThan(value, orEqual):
-                            if orEqual {
-                                Text("Greater or Equals \(value.description)").foregroundColor(.gray)
-                            } else {
-                                Text("Greater than \(value.description)").foregroundColor(.gray)
-                            }
-                        case let .valueIsLessThan(value, orEqual):
-                            if orEqual {
-                                Text("Less or Equals \(value.description)").foregroundColor(.gray)
-                            } else {
-                                Text("Less than \(value.description)").foregroundColor(.gray)
+            Toggle("Show In Widget", isOn: $config.isWidget)
+                .toggleStyle(.switch)
+                .font(largeLabelFont)
+                .disabled(!subscriptionManager.isSubscribed)
+                .onTapGesture {
+                    if !subscriptionManager.isSubscribed {
+                        showSubscriptionSheet = true
+                    }
+                }
+            if subscriptionManager.isSubscribed {
+                HStack {
+                    NavigationLink(destination: AlertConfigView(config: config)) {
+                        HStack {
+                            Text("Alerts").font(largeLabelFont)
+                            Spacer()
+                            switch config.alertType {
+                            case .none:
+                                Text("None").foregroundColor(.gray)
+                            case .everyTime:
+                                Text("Every Time").foregroundColor(.gray)
+                            case .valueChanged:
+                                Text("On Change").foregroundColor(.gray)
+                            case let .valueIsGreaterThan(value, orEqual):
+                                if orEqual {
+                                    Text("Greater or Equals \(value.description)").foregroundColor(.gray)
+                                } else {
+                                    Text("Greater than \(value.description)").foregroundColor(.gray)
+                                }
+                            case let .valueIsLessThan(value, orEqual):
+                                if orEqual {
+                                    Text("Less or Equals \(value.description)").foregroundColor(.gray)
+                                } else {
+                                    Text("Less than \(value.description)").foregroundColor(.gray)
+                                }
                             }
                         }
                     }
+                }
+            } else {
+                HStack {
+                    Text("Alerts").foregroundColor(.gray)
+                    Spacer()
+                    Text("None").foregroundColor(.gray)
+                }.onTapGesture(count: 1) {
+                    showSubscriptionSheet = true
                 }
             }
         }
@@ -264,7 +243,7 @@ struct SelectorView: View {
     }
     
     func onUrlChange() async {
-        if let u = URL(string: "https://\(url)"), let i = Int(resultIndex), let s = selectors.notBlank() {
+        if let u = config.url, let s = config.selector?.notBlank() {
             var request = URLRequest(url: u, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20.0)
             request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
             request.setValue("en", forHTTPHeaderField: "Accept-Language")
@@ -282,7 +261,7 @@ struct SelectorView: View {
                         }
                         try FileManager.default.copyItem(at: data, to: SelectorView.downloadPath)
                         lastEncoding = DownloadManager.stringEncoding(response: response)
-                        lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i-1, resultType: decodeAs, documentEncoding: DownloadManager.stringEncoding(response: response))
+                        lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: Int(config.elementIndex), resultType: config.resultTypeValue, documentEncoding: DownloadManager.stringEncoding(response: response))
                         lastError = nil
                         errorText = ""
                         resultPreview = lastResult?.description() ?? ""
@@ -316,10 +295,20 @@ struct SelectorView: View {
     }
     
     func onChange() async {
+        do {
+            try viewContext.save()
+        } catch {
+            logger.error("could not save managed values: \(error)")
+        }
+        do {
+            try await PushManager.shared.updateSchedules()
+        } catch {
+            logger.error("could not upload schedules: \(error)")
+        }
         if isDownloaded {
-            if let s = selectors.notBlank(), let i = Int(resultIndex) {
+            if let s = config.selector?.notBlank() {
                 do {
-                    lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: i-1, resultType: decodeAs, documentEncoding: lastEncoding)
+                    lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: Int(config.elementIndex), resultType: config.resultTypeValue, documentEncoding: lastEncoding)
                     lastError = nil
                     resultPreview = lastResult?.description() ?? ""
                 } catch {

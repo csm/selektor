@@ -10,7 +10,6 @@ import AppKit
 #else
 import UIKit
 #endif
-import SwiftSoup
 
 extension String {
     func notBlank() -> String? {
@@ -18,14 +17,6 @@ extension String {
             return nil
         }
         return self
-    }
-}
-
-extension Element {
-    var attributedString: AttributedString {
-        get {
-            return createAttributedString(html: (try? self.outerHtml()) ?? "")
-        }
     }
 }
 
@@ -39,3 +30,8 @@ func createAttributedString(html string: String) -> AttributedString {
     return AttributedString(result)
 }
 
+extension Int32 {
+    func inc() -> Int32 {
+        self + 1
+    }
+}

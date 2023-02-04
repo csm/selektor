@@ -78,4 +78,21 @@ struct PersistenceController {
         }
         return nil
     }
+    
+    func deleteConfig(config: Config) {
+        let viewContext = self.container.viewContext
+        let fetchRequest = NSFetchRequest<Config>(entityName: "Config")
+        do {
+            let configs = try viewContext.fetch(fetchRequest).filter { c in c.id != config.id }
+            for c in configs {
+                if c.index > config.index {
+                    c.index = c.index - 1
+                }
+            }
+            viewContext.delete(config)
+            try viewContext.save()
+        } catch {
+            logger.error("error deleting config: \(config)")
+        }
+    }
 }

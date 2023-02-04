@@ -8,21 +8,70 @@
 import UIKit
 import BackgroundTasks
 import CoreData
+import UserNotifications
 //import SwiftMsgPack
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     var currentTimer: Timer? = nil
     
+    var inForeground: Bool = false
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOption: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: backgroundId, using: nil) { (task) in
-            self.runRefresh(task: task as! BGAppRefreshTask)
+            let task = task as! BGAppRefreshTask
+            /*task.expirationHandler = {
+                DownloadManager.shared.backgroundDelegateQueue.cancelAllOperations()
+            }
+            self.runRefresh { task.setTaskCompleted(success: true) }*/
+            task.setTaskCompleted(success: true)
         }
         Scheduler.shared.scheduleConfigs()
-        Task() { await SubscriptionManager.shared.loadSubscriptions() }
+        inForeground = true
+        Task() {
+            await SubscriptionManager.shared.loadData()
+            do {
+                try await CredentialsManager.shared.exchangeCredentials()
+            } catch {
+                logger.error("failed to exchange credentials: \(error)")
+            }
+            do {
+                if try CredentialsManager.shared.credentials != nil {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            } catch {
+                logger.error("could not read credentials: \(error)")
+            }
+        }
+        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
+        
         migrateDb()
         return true
     }
     
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Task() {
+            do {
+                try await PushManager.shared.registerPushToken(token: deviceToken)
+            } catch {
+                logger.error("failed to register push token: \(error)")
+            }
+        }
+    }
+    
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        self.runRefresh {
+            completionHandler(.newData)
+        }
+    }
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        inForeground = false
+    }
+    
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        inForeground = true
+    }
+        
     func migrateDb() {
         do {
             let viewContext = PersistenceController.shared.container.viewContext
@@ -104,15 +153,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         Scheduler.shared.scheduleConfigs()
     }
     
-    func runRefresh(task: BGAppRefreshTask) {
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 1
+    func runRefresh(completion: @escaping () -> Void) {
+        let queue = DownloadManager.shared.backgroundDelegateQueue
         queue.addOperation {
             do {
                 if let config = try PersistenceController.checkConfigToRun() {
                     if let id = config.id, let url = config.url {
                         logger.notice("starting download for config (\(config.name))")
-                        DownloadManager.shared.startDownload(url: url, with: [configIdHeaderKey: id.uuidString])
+                        DownloadManager.shared.startDownload(url: url, with: [configIdHeaderKey: id.uuidString], completion: completion)
                     }
                 } else {
                     logger.notice("no task to run")
@@ -123,6 +171,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 Scheduler.shared.scheduleConfigs(true)
             }
         }
+        /*
+        queue.operations.last?.completionBlock = {
+            task.setTaskCompleted(success: true)
+        }
+         */
     }
     
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {

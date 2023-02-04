@@ -20,6 +20,7 @@ class DownloadManager: NSObject, ObservableObject {
     var foregroundSession: URLSession? = nil
     @Published var tasks: [URLSessionTask] = []
     @Published var completedTasks: [(URLSessionTask, URL?, Error?)] = []
+    var backgroundCompletion: (() -> Void)? = nil
     
     #if os(iOS)
     private var watchDelegate: WCSessionDelegate? = nil
@@ -33,7 +34,9 @@ class DownloadManager: NSObject, ObservableObject {
         config.allowsExpensiveNetworkAccess = true
         config.allowsConstrainedNetworkAccess = true
         config.httpCookieStorage = nil
-        backgroundSession = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue())
+        let delegateQueue = OperationQueue()
+        delegateQueue.maxConcurrentOperationCount = 1
+        backgroundSession = URLSession(configuration: config, delegate: self, delegateQueue: delegateQueue)
         let fgConfig = URLSessionConfiguration.default
         config.isDiscretionary = false
         config.allowsCellularAccess = true
@@ -44,7 +47,14 @@ class DownloadManager: NSObject, ObservableObject {
         updateTasks()
     }
     
-    func startDownload(url: URL, with headers: Dictionary<String, String> = [:]) {
+    var backgroundDelegateQueue: OperationQueue {
+        get {
+            backgroundSession!.delegateQueue
+        }
+    }
+    
+    func startDownload(url: URL, with headers: Dictionary<String, String> = [:], completion: @escaping () -> Void) {
+        self.backgroundCompletion = completion
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         request.attribution = .user
         headers.forEach { (k, v) in
@@ -115,6 +125,10 @@ extension DownloadManager : URLSessionDelegate, URLSessionDownloadDelegate {
         } else {
             logger.info("no UUID header or bad one: \(downloadTask.currentRequest?.value(forHTTPHeaderField: configIdHeaderKey))")
         }
+        if let c = backgroundCompletion {
+            c()
+            backgroundCompletion = nil
+        }
         self.updateTasks()
     }
     
@@ -126,6 +140,14 @@ extension DownloadManager : URLSessionDelegate, URLSessionDownloadDelegate {
                 self.handleDownload(response, id, nil, error, true)
             } else {
                 logger.info("no UUID header or bad one: \(task.currentRequest?.value(forHTTPHeaderField: configIdHeaderKey))")
+                if let c = backgroundCompletion {
+                    c()
+                    backgroundCompletion = nil
+                }
+            }
+            if let c = backgroundCompletion {
+                c()
+                backgroundSession = nil
             }
             self.updateTasks()
         }
@@ -221,6 +243,7 @@ extension DownloadManager {
         if config.alertSound {
             content.sound = UNNotificationSound.default
         }
+        content.interruptionLevel = .timeSensitive
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
         logger.info("sending notification for config \(config.name) with result \(result)")

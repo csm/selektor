@@ -24,7 +24,7 @@ extension Config {
             let decoder = MsgPackDecoder()
             if let encoded = self.lastValue {
                 do {
-                    logger.debug("decoding value \(encoded.base64EncodedString())")
+                    //logger.debug("decoding value \(encoded.base64EncodedString())")
                     return try decoder.decode(Result.self, from: encoded)
                 } catch {
                     logger.error("failed to decode lastResult \(encoded.description): \(error)")
@@ -52,9 +52,14 @@ extension Config {
         return max((self.lastFetch ?? Date.distantPast).addingTimeInterval(TimeUnit.forTag(tag: self.triggerIntervalUnits ?? "d").toTimeInterval(timeValue: self.triggerInterval.positive())), Date())
     }
     
+    var fireIntervalDuration: Duration {
+        let unit = TimeUnit.forTag(tag: self.triggerIntervalUnits ?? TimeUnit.Hours.tag())
+        return unit.toDuration(timeValue: self.triggerInterval)
+    }
+    
     var alertType: AlertType {
         get {
-            return AlertType.alertType(forTag: self.alertTypeTag, compareValue: self.alertCompareValue as! Decimal, orEquals: self.alertOrEquals)
+            return AlertType.alertType(forTag: self.alertTypeTag, compareValue: self.alertCompareValue as? Decimal ?? 0.0, orEquals: self.alertOrEquals)
         }
         set {
             self.alertTypeTag = newValue.tag
@@ -68,6 +73,15 @@ extension Config {
             default:
                 break
             }
+        }
+    }
+    
+    var resultTypeValue: ResultType {
+        get {
+            return ResultType.from(tag: self.resultType) ?? .String
+        }
+        set {
+            self.resultType = newValue.tag()
         }
     }
 }

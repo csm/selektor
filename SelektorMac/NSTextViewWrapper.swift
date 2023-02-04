@@ -105,7 +105,7 @@ struct NSTextViewWrapper: NSViewRepresentable {
     }
     
     func updateNSView(_ nsView: NSTextView, context: Context) {
-        logger.debug("updateNSView \(nsView)")
+        //logger.debug("updateNSView \(nsView)")
         if nsView.string != self.text.wrappedValue {
             nsView.string = self.text.wrappedValue
         }
@@ -117,11 +117,13 @@ struct NSTextViewWrapper: NSViewRepresentable {
     }
     
     static func recalculateHeight(view: NSTextView, result: Binding<CGFloat>) {
-        let newSize = view.visibleRect
-        logger.info("recalc size newSize: \(newSize)")
-        if result.wrappedValue != newSize.height {
-            DispatchQueue.main.async {
-                result.wrappedValue = newSize.height
+        let font = view.font ?? NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
+        let wrapped = wordWrap(view.string, limit: view.frame.width, font: font)
+        let newHeight = CGFloat(wrapped.count) * (font.capHeight + font.ascender + font.descender) + 10.0
+        //logger.info("recalc size newSize: \(newHeight) line count: \(wrapped.count)")
+        if result.wrappedValue != newHeight {
+            DispatchQueue.main.async { 
+                result.wrappedValue = newHeight
             }
         }
     }

@@ -43,3 +43,62 @@ extension Binding<String?> {
         })
     }
 }
+
+extension Binding<Int64> {
+    func stringBinding() -> Binding<String> {
+        return Binding<String>(get: {
+            String(self.wrappedValue)
+        }, set: { newValue in
+            if let d = Int64(newValue) {
+                self.wrappedValue = d
+            }
+        })
+    }
+}
+
+extension Binding<Int32> {
+    func stringBinding() -> Binding<String> {
+        return Binding<String>(get: {
+            String(self.wrappedValue)
+        }, set: { newValue in
+            if let d = Int32(newValue) {
+                self.wrappedValue = d
+            }
+        })
+    }
+    
+    // Create a string binding, but a "one based" binding.
+    // That is, when this is 0, string value is "1".
+    // When string value is "1", this value is 0.
+    func oneBasedStringBinding() -> Binding<String> {
+        return Binding<String>(get: {
+            String(self.wrappedValue + 1)
+        }, set: { newValue in
+            if let d = Int32(newValue) {
+                if d >= 1 {
+                    self.wrappedValue = d - 1
+                }
+            }
+        })
+    }
+    
+    func oneBasedBinding() -> Binding<Int32> {
+        return Binding<Int32>(get: {
+            self.wrappedValue + 1
+        }, set: { newValue in
+            if newValue >= 1 {
+                self.wrappedValue = newValue - 1
+            }
+        })
+    }
+}
+
+extension Binding<String?> {
+    func timeUnitBinding() -> Binding<TimeUnit> {
+        return Binding<TimeUnit>(get: {
+            TimeUnit.forTag(tag: self.wrappedValue)
+        }, set: { newValue in
+            self.wrappedValue = newValue.tag()
+        })
+    }
+}

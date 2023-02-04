@@ -8,39 +8,6 @@
 import SwiftUI
 import WebKit
 
-struct ElementSelectResult: Codable {
-    let selector: String
-    let index: Int
-}
-
-protocol OnScriptResultHandler {
-    var id: String { get }
-    func onScriptResult(text: String)
-    func isEqual(that: any OnScriptResultHandler) -> Bool
-}
-
-class ScriptMessageHandlerImpl: NSObject, WKScriptMessageHandler {
-    static let shared = ScriptMessageHandlerImpl()
-    var handlers: [OnScriptResultHandler] = []
-
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        logger.debug("received message name: \(message.name) body: \(message.body)")
-        if message.name == "clickElement" {
-            if let body = message.body as? String {
-                handlers.forEach { handler in handler.onScriptResult(text: body) }
-            }
-        }
-    }
-    
-    func registerHandler(handler: OnScriptResultHandler) {
-        handlers.append(handler)
-    }
-    
-    func unregisterHandler(handler: OnScriptResultHandler) {
-        handlers = handlers.filter { e in !e.isEqual(that: handler) }
-    }
-}
-
 struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
     @Environment(\.dismiss) var dismiss
     
@@ -71,7 +38,6 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
     init(config: Config) {
         self.config = config
         let pagePreferences = WKWebpagePreferences()
-        //pagePreferences.allowsContentJavaScript = false
         let preferences = WKPreferences()
         preferences.isTextInteractionEnabled = false
         let configuration = WKWebViewConfiguration()
@@ -107,24 +73,21 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
                     dismiss()
                 }
             }.padding([.leading, .trailing, .top], 20)
-            //List {
             MultilineTextField(placeholder: "", text: $selector) {
                 Task() { await onSelectorChange() }
             }.padding(.all, 8)
             Divider()
             HStack {
-                Text("Element Index").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
+                Text("Element Index").font(labelFont)
                 Spacer()
                 TextField(text: $resultIndexText) {
                     Text("Result Index")
                 }.frame(maxWidth: 100, alignment: .trailing)
-#if os(iOS)
                     .keyboardType(.numberPad)
-#endif
             }.padding(.all, 8)
             Divider()
             HStack {
-                Text("Result").font(.system(size: 16, weight: .black).lowercaseSmallCaps())
+                Text("Result").font(labelFont)
                 Spacer()
                 Text(result?.description() ?? "").foregroundColor(.gray)
             }.padding(.all, 8)
@@ -170,7 +133,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
         } catch {
             logger.info("could not remove \(SelectorPreviewView.downloadPath): \(error)")
         }
-        try html.write(to: SelectorPreviewView.downloadDir, atomically: false, encoding: .utf8)
+        try html.write(to: SelectorPreviewView.downloadPath, atomically: false, encoding: .utf8)
         var request2 = URLRequest(url: SelectorPreviewView.downloadPath)
         request2.attribution = .user
         webView.loadHTMLString(html, baseURL: nil)
@@ -259,6 +222,8 @@ document.querySelectorAll("\(s)")[\(i - 1)]
 """
         }
     }
+    
+    let labelFont = Font.headline
 }
 
 struct SelectorPreviewView_Previews: PreviewProvider {

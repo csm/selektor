@@ -15,39 +15,63 @@ struct SubscribeView: View {
         case subscribed
     }
     
+    @ObservedObject var subscriptionManager = SubscriptionManager.shared
     @State var state: ViewState = .loadingInfo
+    let formatter: DateFormatter = {
+        let d = DateFormatter()
+        d.dateStyle = .medium
+        return d
+    }()
     
     var body: some View {
-        switch (state) {
-        case .loadingInfo:
-            VStack(alignment: .center) {
-                Text("Loading Subscription")
-            }.onAppear {
-                
+        switch subscriptionManager.subscriptionState {
+        case .unknown, .loading:
+            VStack {
+                Text("Loading subscriptions...")
+                ProgressView()
+                Spacer()
             }
-        case .needsSubscription:
-            VStack(alignment: .center) {
-                Text("Please subscribe to Selektor!")
+        case .notSubscribed:
+            switch subscriptionManager.productState {
+            case .unknown, .loading:
+                VStack {
+                    Text("Loading subscriptions...")
+                    ProgressView()
+                    Spacer()
+                }
+            case .loaded:
+                VStack {
+                    Text("Subscribe to Selektor").font(.title)
+                    Spacer()
+                    Text("Subscribe to access the full app: schedule selectors and configure alerts.").lineLimit(nil).multilineTextAlignment(.center).padding(.bottom, 20)
+                    ForEach(subscriptionManager.products) { product in
+                        VStack {
+                            Text("\(product.displayName)")
+                            Button("\(product.displayPrice)") {
+                                Task() {
+                                    await subscriptionManager.purchase(product)
+                                }
+                            }.font(.headline).buttonStyle(.borderedProminent).padding(.bottom, 10)
+                        }
+                    }
+                    Spacer()
+                }
+            case .error(let cause):
+                VStack {
+                    Text("Could not load products.")
+                    Text("\(cause.localizedDescription)")
+                }
             }
-        case .subscribed:
-            VStack(alignment: .center) {
-                Text("You're subscribed!")
+        case .subscribed(let until):
+            VStack {
+                Text("You're Subscribed!").font(.title)
+                if let until = until {
+                    Text("You have full access to Selektor until \(formatter.string(from: until))").lineLimit(nil)
+                } else {
+                    Text("You have full access to Selektor.")
+                }
+                Text("Thanks for your support!")
             }
-        }
-    }
-    
-    func loadTransactions() async {
-        for await verificationResult in Transaction.currentEntitlements {
-            switch verificationResult {
-            case .verified(let transaction):
-                // TODO verify subscription
-                state = .subscribed
-            case .unverified(_, let verificationError):
-                logger.warning("transaction unverified with error: \(verificationError)")
-            }
-        }
-        if state == .loadingInfo {
-            state = .needsSubscription
         }
     }
 }

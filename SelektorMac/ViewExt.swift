@@ -7,8 +7,19 @@
 
 import SwiftUI
 
+private struct WindowEnvironmentKey: EnvironmentKey {
+    static let defaultValue: NSWindow? = nil
+}
+
+extension EnvironmentValues {
+    var window: NSWindow? {
+        get { self[WindowEnvironmentKey.self] }
+        set { self[WindowEnvironmentKey.self] = newValue }
+    }
+}
+
 extension View {
-    private func newWindowInternal(with title: String, level: NSWindow.Level, size: CGSize) -> NSWindow {
+    func openWindow(with title: String = "New Window", level: NSWindow.Level = .normal, size: CGSize = CGSize(width: 400, height: 400)) {
         let window = NSWindow(
             contentRect: NSRect(x: 20, y: 20, width: size.width, height: size.height),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
@@ -19,11 +30,8 @@ extension View {
         window.isReleasedWhenClosed = false
         window.title = title
         window.level = level
-        window.makeKeyAndOrderFront(nil)
-        return window
-    }
-    
-    func openWindow(with title: String = "New Window", level: NSWindow.Level = .normal, size: CGSize = CGSize(width: 400, height: 400)) {
-        newWindowInternal(with: title, level: level, size: size).contentView = NSHostingView(rootView: self)
+        window.makeKeyAndOrderFront(self)
+        window.makeMain()
+        window.contentView = NSHostingView(rootView: self.environment(\.window, window))
     }
 }

@@ -13,9 +13,36 @@
 		701849822966A04900EFC53D /* WordWrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701849812966A04900EFC53D /* WordWrap.swift */; };
 		701849832966A07C00EFC53D /* WordWrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701849812966A04900EFC53D /* WordWrap.swift */; };
 		701849852967DB0F00EFC53D /* ConfigListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701849842967DB0F00EFC53D /* ConfigListViewController.swift */; };
+		701849882972753A00EFC53D /* SwiftSoupExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701849872972753A00EFC53D /* SwiftSoupExt.swift */; };
+		701849892972753A00EFC53D /* SwiftSoupExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701849872972753A00EFC53D /* SwiftSoupExt.swift */; };
+		7018498A2972758000EFC53D /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E772936C770009C09D0 /* Ext.swift */; };
+		7018498C29735B5800EFC53D /* SelectorPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7018498B29735B5800EFC53D /* SelectorPreviewView.swift */; };
+		7018498E29735BA900EFC53D /* SelectorPreviewSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7018498D29735BA900EFC53D /* SelectorPreviewSupport.swift */; };
+		7018498F29735BA900EFC53D /* SelectorPreviewSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7018498D29735BA900EFC53D /* SelectorPreviewSupport.swift */; };
+		701849972974C41900EFC53D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70C18E552936797C009C09D0 /* WidgetKit.framework */; };
+		701849982974C41900EFC53D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70C18E572936797C009C09D0 /* SwiftUI.framework */; };
+		7018499E2974C41B00EFC53D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7018499D2974C41B00EFC53D /* Assets.xcassets */; };
+		701849A12974C41B00EFC53D /* SelektorMacWidgets.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 7018499C2974C41900EFC53D /* SelektorMacWidgets.intentdefinition */; };
+		701849A22974C41B00EFC53D /* SelektorMacWidgets.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 7018499C2974C41900EFC53D /* SelektorMacWidgets.intentdefinition */; };
+		701849A52974C41B00EFC53D /* SelektorMacWidgetsExtension.appex in CopyFiles */ = {isa = PBXBuildFile; fileRef = 701849962974C41900EFC53D /* SelektorMacWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		701849A92974C45800EFC53D /* SelektorWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20EE8293A940200F2B2B3 /* SelektorWidgets.swift */; };
+		701849AA2974C46C00EFC53D /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E28293678EB009C09D0 /* Persistence.swift */; };
+		701849AB2974C46E00EFC53D /* Selektor.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E2A293678EB009C09D0 /* Selektor.xcdatamodeld */; };
+		701849AC2974C47B00EFC53D /* Selector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6929369742009C09D0 /* Selector.swift */; };
+		701849AD2974C48000EFC53D /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6D29369F9C009C09D0 /* Result.swift */; };
+		701849AE2974C48600EFC53D /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E752936AAF3009C09D0 /* Config.swift */; };
+		701849AF2974C48800EFC53D /* Duration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E792936DE64009C09D0 /* Duration.swift */; };
+		701849B02974C48C00EFC53D /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F05293F009800F2B2B3 /* Constants.swift */; };
+		701849B12974C48E00EFC53D /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F0B2943F2BD00F2B2B3 /* AlertType.swift */; };
+		701849B22974C49100EFC53D /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F1029450F5E00F2B2B3 /* AppGroup.swift */; };
+		701849B32974C49400EFC53D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F132946516F00F2B2B3 /* Logger.swift */; };
+		701849B42974C4D700EFC53D /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E772936C770009C09D0 /* Ext.swift */; };
+		701849B62974C71200EFC53D /* SwiftMsgpackCsm in Frameworks */ = {isa = PBXBuildFile; productRef = 701849B52974C71200EFC53D /* SwiftMsgpackCsm */; };
 		702A7FF92963FA6500DAD0C7 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702A7FF82963FA6500DAD0C7 /* WebView.swift */; };
 		702A7FFA2963FB3E00DAD0C7 /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E772936C770009C09D0 /* Ext.swift */; };
 		702A7FFE2963FD6200DAD0C7 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 702A7FFD2963FD6200DAD0C7 /* UserNotifications.framework */; };
+		7061C914298CA5910031CCEE /* PushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7061C913298CA5910031CCEE /* PushManager.swift */; };
+		7061C916298E1DBF0031CCEE /* NotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7061C915298E1DBE0031CCEE /* NotificationDelegate.swift */; };
 		7068075D295666860013AE63 /* Divider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7068075C295666860013AE63 /* Divider.swift */; };
 		70680763295D0F320013AE63 /* SwiftMsgpackCsm in Frameworks */ = {isa = PBXBuildFile; productRef = 70680762295D0F320013AE63 /* SwiftMsgpackCsm */; };
 		70680765295D10310013AE63 /* SwiftMsgpackCsm in Frameworks */ = {isa = PBXBuildFile; productRef = 70680764295D10310013AE63 /* SwiftMsgpackCsm */; };
@@ -28,7 +55,6 @@
 		706807952963E7FB0013AE63 /* SelektorMacUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 706807942963E7FB0013AE63 /* SelektorMacUITests.swift */; };
 		706807972963E7FB0013AE63 /* SelektorMacUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 706807962963E7FB0013AE63 /* SelektorMacUITestsLaunchTests.swift */; };
 		706807A22963E8C90013AE63 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 706807A12963E8C90013AE63 /* AppDelegate.swift */; };
-		706807A32963E9B10013AE63 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E21293678E9009C09D0 /* ContentView.swift */; };
 		706807A42963E9B80013AE63 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E28293678EB009C09D0 /* Persistence.swift */; };
 		706807A52963E9BD0013AE63 /* Selector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6929369742009C09D0 /* Selector.swift */; };
 		706807A62963E9C00013AE63 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6D29369F9C009C09D0 /* Result.swift */; };
@@ -49,9 +75,7 @@
 		706807BA2963F1890013AE63 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F072940050B00F2B2B3 /* DownloadManager.swift */; };
 		706807BB2963F1960013AE63 /* AlertConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F092941618600F2B2B3 /* AlertConfigView.swift */; };
 		706807BC2963F19B0013AE63 /* LogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F1D294BAB6F00F2B2B3 /* LogsView.swift */; };
-		706807BD2963F19F0013AE63 /* SelectorPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F5B2953A19400F2B2B3 /* SelectorPreviewView.swift */; };
 		706807BE2963F1A40013AE63 /* elementPath.js in Resources */ = {isa = PBXBuildFile; fileRef = 70E20F5F2953D3A100F2B2B3 /* elementPath.js */; };
-		706807BF2963F1AC0013AE63 /* SubscribeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F632954DB5C00F2B2B3 /* SubscribeView.swift */; };
 		706807C02963F1B10013AE63 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F652954EA0C00F2B2B3 /* SubscriptionManager.swift */; };
 		706807C12963F1B80013AE63 /* Divider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7068075C295666860013AE63 /* Divider.swift */; };
 		706807C22963F1BA0013AE63 /* HTMLCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70680769295E25AD0013AE63 /* HTMLCleaner.swift */; };
@@ -69,7 +93,6 @@
 		70C18E5B2936797C009C09D0 /* SelektorWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E5A2936797C009C09D0 /* SelektorWatch.swift */; };
 		70C18E5E2936797E009C09D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 70C18E5D2936797E009C09D0 /* Assets.xcassets */; };
 		70C18E602936797E009C09D0 /* SelektorWatch.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E5C2936797C009C09D0 /* SelektorWatch.intentdefinition */; };
-		70C18E6429367CB6009C09D0 /* SelektorWatchExtension.appex in Resources */ = {isa = PBXBuildFile; fileRef = 70C18E532936797C009C09D0 /* SelektorWatchExtension.appex */; };
 		70C18E682936865A009C09D0 /* BackgroundTasks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70C18E672936865A009C09D0 /* BackgroundTasks.framework */; };
 		70C18E6A29369742009C09D0 /* Selector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6929369742009C09D0 /* Selector.swift */; };
 		70C18E6C2936990E009C09D0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E6B2936990E009C09D0 /* AppDelegate.swift */; };
@@ -79,6 +102,11 @@
 		70C18E762936AAF3009C09D0 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E752936AAF3009C09D0 /* Config.swift */; };
 		70C18E782936C770009C09D0 /* Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E772936C770009C09D0 /* Ext.swift */; };
 		70C18E7A2936DE64009C09D0 /* Duration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C18E792936DE64009C09D0 /* Duration.swift */; };
+		70D187DD297F50CB003A210F /* SubscribeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70D187DC297F50CB003A210F /* SubscribeView.swift */; };
+		70D187DF297F5E8F003A210F /* Selektor.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 70D187DE297F5E8F003A210F /* Selektor.storekit */; };
+		70D187E0297F5E8F003A210F /* Selektor.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 70D187DE297F5E8F003A210F /* Selektor.storekit */; };
+		70D187E2297F8D0D003A210F /* StoreKitTestCertificate.cer in Resources */ = {isa = PBXBuildFile; fileRef = 70D187E1297F8D0D003A210F /* StoreKitTestCertificate.cer */; };
+		70D187E42980A047003A210F /* CredentialsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70D187E32980A047003A210F /* CredentialsManager.swift */; };
 		70E20EB829371E5300F2B2B3 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20EB729371E5300F2B2B3 /* WebView.swift */; };
 		70E20EBD2937EA9A00F2B2B3 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70E20EBC2937EA9A00F2B2B3 /* WebKit.framework */; };
 		70E20EC12937EAC900F2B2B3 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70E20EC02937EAC800F2B2B3 /* WebKit.framework */; };
@@ -143,6 +171,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		701849A32974C41B00EFC53D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 70C18E14293678E9009C09D0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 701849952974C41900EFC53D;
+			remoteInfo = SelektorMacWidgetsExtension;
+		};
 		706807872963E7FA0013AE63 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 70C18E14293678E9009C09D0 /* Project object */;
@@ -202,6 +237,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		701849902974C3C800EFC53D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				701849A52974C41B00EFC53D /* SelektorMacWidgetsExtension.appex in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		70E20EDF293A8EA600F2B2B3 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -221,9 +266,20 @@
 		7018497F296690A100EFC53D /* ConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigView.swift; sourceTree = "<group>"; };
 		701849812966A04900EFC53D /* WordWrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordWrap.swift; sourceTree = "<group>"; };
 		701849842967DB0F00EFC53D /* ConfigListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigListViewController.swift; sourceTree = "<group>"; };
+		701849872972753A00EFC53D /* SwiftSoupExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSoupExt.swift; sourceTree = "<group>"; };
+		7018498B29735B5800EFC53D /* SelectorPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectorPreviewView.swift; sourceTree = "<group>"; };
+		7018498D29735BA900EFC53D /* SelectorPreviewSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectorPreviewSupport.swift; sourceTree = "<group>"; };
+		701849962974C41900EFC53D /* SelektorMacWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SelektorMacWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		7018499A2974C41900EFC53D /* SelektorMacWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelektorMacWidgets.swift; sourceTree = "<group>"; };
+		7018499C2974C41900EFC53D /* SelektorMacWidgets.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = SelektorMacWidgets.intentdefinition; sourceTree = "<group>"; };
+		7018499D2974C41B00EFC53D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7018499F2974C41B00EFC53D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		701849A02974C41B00EFC53D /* SelektorMacWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SelektorMacWidgets.entitlements; sourceTree = "<group>"; };
 		702A7FF82963FA6500DAD0C7 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		702A7FFB2963FC5000DAD0C7 /* BackgroundTasks.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BackgroundTasks.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk/System/Library/Frameworks/BackgroundTasks.framework; sourceTree = DEVELOPER_DIR; };
 		702A7FFD2963FD6200DAD0C7 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk/System/Library/Frameworks/UserNotifications.framework; sourceTree = DEVELOPER_DIR; };
+		7061C913298CA5910031CCEE /* PushManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushManager.swift; sourceTree = "<group>"; };
+		7061C915298E1DBE0031CCEE /* NotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDelegate.swift; sourceTree = "<group>"; };
 		7068075C295666860013AE63 /* Divider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Divider.swift; sourceTree = "<group>"; };
 		70680769295E25AD0013AE63 /* HTMLCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLCleaner.swift; sourceTree = "<group>"; };
 		706807712963E7F80013AE63 /* SelektorMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SelektorMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -266,6 +322,10 @@
 		70C18E752936AAF3009C09D0 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		70C18E772936C770009C09D0 /* Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ext.swift; sourceTree = "<group>"; };
 		70C18E792936DE64009C09D0 /* Duration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Duration.swift; sourceTree = "<group>"; };
+		70D187DC297F50CB003A210F /* SubscribeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscribeView.swift; sourceTree = "<group>"; };
+		70D187DE297F5E8F003A210F /* Selektor.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Selektor.storekit; sourceTree = "<group>"; };
+		70D187E1297F8D0D003A210F /* StoreKitTestCertificate.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = StoreKitTestCertificate.cer; sourceTree = "<group>"; };
+		70D187E32980A047003A210F /* CredentialsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsManager.swift; sourceTree = "<group>"; };
 		70E20EB729371E5300F2B2B3 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		70E20EBC2937EA9A00F2B2B3 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		70E20EC02937EAC800F2B2B3 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk/System/iOSSupport/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -317,6 +377,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		701849932974C41900EFC53D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				701849B62974C71200EFC53D /* SwiftMsgpackCsm in Frameworks */,
+				701849982974C41900EFC53D /* SwiftUI.framework in Frameworks */,
+				701849972974C41900EFC53D /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7068076E2963E7F80013AE63 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -413,6 +483,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		701849992974C41900EFC53D /* SelektorMacWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				7018499A2974C41900EFC53D /* SelektorMacWidgets.swift */,
+				7018499C2974C41900EFC53D /* SelektorMacWidgets.intentdefinition */,
+				7018499D2974C41B00EFC53D /* Assets.xcassets */,
+				7018499F2974C41B00EFC53D /* Info.plist */,
+				701849A02974C41B00EFC53D /* SelektorMacWidgets.entitlements */,
+			);
+			path = SelektorMacWidgets;
+			sourceTree = "<group>";
+		};
 		706807722963E7F80013AE63 /* SelektorMac */ = {
 			isa = PBXGroup;
 			children = (
@@ -433,6 +515,8 @@
 				7018497D29668FBE00EFC53D /* MenuHostingView.swift */,
 				7018497F296690A100EFC53D /* ConfigView.swift */,
 				701849842967DB0F00EFC53D /* ConfigListViewController.swift */,
+				7018498B29735B5800EFC53D /* SelectorPreviewView.swift */,
+				70D187DC297F50CB003A210F /* SubscribeView.swift */,
 			);
 			path = SelektorMac;
 			sourceTree = "<group>";
@@ -478,6 +562,7 @@
 				706807722963E7F80013AE63 /* SelektorMac */,
 				706807892963E7FB0013AE63 /* SelektorMacTests */,
 				706807932963E7FB0013AE63 /* SelektorMacUITests */,
+				701849992974C41900EFC53D /* SelektorMacWidgets */,
 				70C18E542936797C009C09D0 /* Frameworks */,
 				70C18E1D293678E9009C09D0 /* Products */,
 			);
@@ -497,6 +582,7 @@
 				706807712963E7F80013AE63 /* SelektorMac.app */,
 				706807862963E7FA0013AE63 /* SelektorMacTests.xctest */,
 				706807902963E7FB0013AE63 /* SelektorMacUITests.xctest */,
+				701849962974C41900EFC53D /* SelektorMacWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -504,7 +590,6 @@
 		70C18E1E293678E9009C09D0 /* Selektor */ = {
 			isa = PBXGroup;
 			children = (
-				70C18E772936C770009C09D0 /* Ext.swift */,
 				70E20F0E2944415A00F2B2B3 /* Selektor.entitlements */,
 				70C18E1F293678E9009C09D0 /* SelektorApp.swift */,
 				70C18E21293678E9009C09D0 /* ContentView.swift */,
@@ -528,6 +613,10 @@
 				70E20F652954EA0C00F2B2B3 /* SubscriptionManager.swift */,
 				7068075C295666860013AE63 /* Divider.swift */,
 				70680769295E25AD0013AE63 /* HTMLCleaner.swift */,
+				701849872972753A00EFC53D /* SwiftSoupExt.swift */,
+				70D187E32980A047003A210F /* CredentialsManager.swift */,
+				7061C913298CA5910031CCEE /* PushManager.swift */,
+				7061C915298E1DBE0031CCEE /* NotificationDelegate.swift */,
 			);
 			path = Selektor;
 			sourceTree = "<group>";
@@ -613,6 +702,10 @@
 				70E9F5A2296506B6007E170D /* Bindings.swift */,
 				70E9F5A529660E21007E170D /* Debounce.swift */,
 				701849812966A04900EFC53D /* WordWrap.swift */,
+				7018498D29735BA900EFC53D /* SelectorPreviewSupport.swift */,
+				70C18E772936C770009C09D0 /* Ext.swift */,
+				70D187DE297F5E8F003A210F /* Selektor.storekit */,
+				70D187E1297F8D0D003A210F /* StoreKitTestCertificate.cer */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -656,6 +749,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		701849952974C41900EFC53D /* SelektorMacWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 701849A62974C41B00EFC53D /* Build configuration list for PBXNativeTarget "SelektorMacWidgetsExtension" */;
+			buildPhases = (
+				701849922974C41900EFC53D /* Sources */,
+				701849932974C41900EFC53D /* Frameworks */,
+				701849942974C41900EFC53D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SelektorMacWidgetsExtension;
+			packageProductDependencies = (
+				701849B52974C71200EFC53D /* SwiftMsgpackCsm */,
+			);
+			productName = SelektorMacWidgetsExtension;
+			productReference = 701849962974C41900EFC53D /* SelektorMacWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		706807702963E7F80013AE63 /* SelektorMac */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 706807982963E7FB0013AE63 /* Build configuration list for PBXNativeTarget "SelektorMac" */;
@@ -663,10 +776,12 @@
 				7068076D2963E7F80013AE63 /* Sources */,
 				7068076E2963E7F80013AE63 /* Frameworks */,
 				7068076F2963E7F80013AE63 /* Resources */,
+				701849902974C3C800EFC53D /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				701849A42974C41B00EFC53D /* PBXTargetDependency */,
 			);
 			name = SelektorMac;
 			packageProductDependencies = (
@@ -873,9 +988,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1400;
+				LastSwiftUpdateCheck = 1410;
 				LastUpgradeCheck = 1400;
 				TargetAttributes = {
+					701849952974C41900EFC53D = {
+						CreatedOnToolsVersion = 14.1;
+					};
 					706807702963E7F80013AE63 = {
 						CreatedOnToolsVersion = 14.0.1;
 					};
@@ -945,20 +1063,31 @@
 				706807702963E7F80013AE63 /* SelektorMac */,
 				706807852963E7FA0013AE63 /* SelektorMacTests */,
 				7068078F2963E7FB0013AE63 /* SelektorMacUITests */,
+				701849952974C41900EFC53D /* SelektorMacWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		701849942974C41900EFC53D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7018499E2974C41B00EFC53D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7068076F2963E7F80013AE63 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				7068077B2963E7FA0013AE63 /* Preview Assets.xcassets in Resources */,
+				70D187E2297F8D0D003A210F /* StoreKitTestCertificate.cer in Resources */,
 				706807BE2963F1A40013AE63 /* elementPath.js in Resources */,
 				706807782963E7FA0013AE63 /* Assets.xcassets in Resources */,
 				70E9F59829650104007E170D /* Main.storyboard in Resources */,
 				7018497C29668F7700EFC53D /* ConfigView.xib in Resources */,
+				70D187E0297F5E8F003A210F /* Selektor.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -981,7 +1110,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				70E20F602953D3A200F2B2B3 /* elementPath.js in Resources */,
-				70C18E6429367CB6009C09D0 /* SelektorWatchExtension.appex in Resources */,
+				70D187DF297F5E8F003A210F /* Selektor.storekit in Resources */,
 				70C18E27293678EB009C09D0 /* Preview Assets.xcassets in Resources */,
 				70C18E24293678EB009C09D0 /* Assets.xcassets in Resources */,
 			);
@@ -1043,6 +1172,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		701849922974C41900EFC53D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				701849B22974C49100EFC53D /* AppGroup.swift in Sources */,
+				701849AD2974C48000EFC53D /* Result.swift in Sources */,
+				701849AA2974C46C00EFC53D /* Persistence.swift in Sources */,
+				701849A92974C45800EFC53D /* SelektorWidgets.swift in Sources */,
+				701849AE2974C48600EFC53D /* Config.swift in Sources */,
+				701849B42974C4D700EFC53D /* Ext.swift in Sources */,
+				701849AC2974C47B00EFC53D /* Selector.swift in Sources */,
+				701849AB2974C46E00EFC53D /* Selektor.xcdatamodeld in Sources */,
+				701849B32974C49400EFC53D /* Logger.swift in Sources */,
+				701849B12974C48E00EFC53D /* AlertType.swift in Sources */,
+				701849A12974C41B00EFC53D /* SelektorMacWidgets.intentdefinition in Sources */,
+				701849AF2974C48800EFC53D /* Duration.swift in Sources */,
+				701849B02974C48C00EFC53D /* Constants.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7068076D2963E7F80013AE63 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1051,8 +1200,8 @@
 				706807BC2963F19B0013AE63 /* LogsView.swift in Sources */,
 				706807BA2963F1890013AE63 /* DownloadManager.swift in Sources */,
 				706807C12963F1B80013AE63 /* Divider.swift in Sources */,
-				706807A32963E9B10013AE63 /* ContentView.swift in Sources */,
 				701849852967DB0F00EFC53D /* ConfigListViewController.swift in Sources */,
+				70D187DD297F50CB003A210F /* SubscribeView.swift in Sources */,
 				706807A72963E9C30013AE63 /* Config.swift in Sources */,
 				70184980296690A100EFC53D /* ConfigView.swift in Sources */,
 				706807BB2963F1960013AE63 /* AlertConfigView.swift in Sources */,
@@ -1068,22 +1217,24 @@
 				706807C02963F1B10013AE63 /* SubscriptionManager.swift in Sources */,
 				706807AA2963E9CE0013AE63 /* AlertType.swift in Sources */,
 				706807C22963F1BA0013AE63 /* HTMLCleaner.swift in Sources */,
-				706807BF2963F1AC0013AE63 /* SubscribeView.swift in Sources */,
 				70E9F5722964B35D007E170D /* ViewExt.swift in Sources */,
 				70E9F5A1296505EC007E170D /* NavigationDelegateImpl.swift in Sources */,
+				7018498F29735BA900EFC53D /* SelectorPreviewSupport.swift in Sources */,
+				7018498C29735B5800EFC53D /* SelectorPreviewView.swift in Sources */,
 				70E9F5742964B455007E170D /* SettingsView.swift in Sources */,
 				702A7FF92963FA6500DAD0C7 /* WebView.swift in Sources */,
 				7018497E29668FBE00EFC53D /* MenuHostingView.swift in Sources */,
+				701849892972753A00EFC53D /* SwiftSoupExt.swift in Sources */,
 				706807B72963F17D0013AE63 /* ValueSelector.swift in Sources */,
 				706807B82963F1800013AE63 /* Scheduler.swift in Sources */,
 				706807AC2963E9D90013AE63 /* Logger.swift in Sources */,
 				70E9F5A4296506B6007E170D /* Bindings.swift in Sources */,
 				706807A62963E9C00013AE63 /* Result.swift in Sources */,
-				706807BD2963F19F0013AE63 /* SelectorPreviewView.swift in Sources */,
 				706807B52963EB500013AE63 /* NSTextViewWrapper.swift in Sources */,
 				701849822966A04900EFC53D /* WordWrap.swift in Sources */,
 				706807B62963F0AF0013AE63 /* MultilineTextField.swift in Sources */,
 				706807A52963E9BD0013AE63 /* Selector.swift in Sources */,
+				701849A22974C41B00EFC53D /* SelektorMacWidgets.intentdefinition in Sources */,
 				702A7FFA2963FB3E00DAD0C7 /* Ext.swift in Sources */,
 				70E9F5A729660E21007E170D /* Debounce.swift in Sources */,
 			);
@@ -1114,17 +1265,21 @@
 				70C18E6C2936990E009C09D0 /* AppDelegate.swift in Sources */,
 				70E20F06293F009800F2B2B3 /* Constants.swift in Sources */,
 				70E20F662954EA0C00F2B2B3 /* SubscriptionManager.swift in Sources */,
+				7018498E29735BA900EFC53D /* SelectorPreviewSupport.swift in Sources */,
 				70E20EC329392D8200F2B2B3 /* UITextViewWrapper.swift in Sources */,
 				70E20EEF293A940300F2B2B3 /* SelektorWidgets.intentdefinition in Sources */,
 				70C18E7A2936DE64009C09D0 /* Duration.swift in Sources */,
+				7061C916298E1DBF0031CCEE /* NotificationDelegate.swift in Sources */,
 				70E20F5C2953A19500F2B2B3 /* SelectorPreviewView.swift in Sources */,
 				70E20F572952629900F2B2B3 /* CircleTextView.swift in Sources */,
 				70E20EC72939376500F2B2B3 /* ValueSelector.swift in Sources */,
 				70E20EC52939326200F2B2B3 /* MultilineTextField.swift in Sources */,
+				70D187E42980A047003A210F /* CredentialsManager.swift in Sources */,
 				70E20F142946516F00F2B2B3 /* Logger.swift in Sources */,
 				70C18E742936AA83009C09D0 /* SelectorView.swift in Sources */,
 				70E20F04293EA72800F2B2B3 /* HistoryView.swift in Sources */,
 				70C18E762936AAF3009C09D0 /* Config.swift in Sources */,
+				701849882972753A00EFC53D /* SwiftSoupExt.swift in Sources */,
 				70E9F5A3296506B6007E170D /* Bindings.swift in Sources */,
 				70E20F0C2943F2BD00F2B2B3 /* AlertType.swift in Sources */,
 				7068076A295E25AD0013AE63 /* HTMLCleaner.swift in Sources */,
@@ -1145,6 +1300,7 @@
 				7068075D295666860013AE63 /* Divider.swift in Sources */,
 				70E20F1129450F5E00F2B2B3 /* AppGroup.swift in Sources */,
 				70C18E782936C770009C09D0 /* Ext.swift in Sources */,
+				7061C914298CA5910031CCEE /* PushManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1193,6 +1349,7 @@
 				70E20EE9293A940200F2B2B3 /* SelektorWidgets.swift in Sources */,
 				70E20EFB293E779800F2B2B3 /* Config.swift in Sources */,
 				70E20EFA293AA51100F2B2B3 /* Selector.swift in Sources */,
+				7018498A2972758000EFC53D /* Ext.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1226,6 +1383,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		701849A42974C41B00EFC53D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 701849952974C41900EFC53D /* SelektorMacWidgetsExtension */;
+			targetProxy = 701849A32974C41B00EFC53D /* PBXContainerItemProxy */;
+		};
 		706807882963E7FA0013AE63 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 706807702963E7F80013AE63 /* SelektorMac */;
@@ -1280,9 +1442,70 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		701849A72974C41B00EFC53D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SelektorMacWidgets/SelektorMacWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3W2S6XUTR8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SelektorMacWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SelektorMacWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.Selektor.SelektorMacWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		701849A82974C41B00EFC53D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SelektorMacWidgets/SelektorMacWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3W2S6XUTR8;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SelektorMacWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SelektorMacWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.Selektor.SelektorMacWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		706807992963E7FB0013AE63 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SelektorMac/SelektorMac.entitlements;
@@ -1294,6 +1517,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Selektor;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -1304,7 +1529,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.SelektorMac;
+				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.Selektor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1315,6 +1540,7 @@
 		7068079A2963E7FB0013AE63 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = SelektorMac/SelektorMac.entitlements;
@@ -1326,6 +1552,8 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Selektor;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -1336,7 +1564,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.SelektorMac;
+				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.Selektor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1540,6 +1768,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Selektor/Selektor.entitlements;
@@ -1564,9 +1793,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.Selektor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -1574,6 +1806,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Selektor/Selektor.entitlements;
@@ -1598,9 +1831,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.metastatic.Selektor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -1941,6 +2177,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		701849A62974C41B00EFC53D /* Build configuration list for PBXNativeTarget "SelektorMacWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				701849A72974C41B00EFC53D /* Debug */,
+				701849A82974C41B00EFC53D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		706807982963E7FB0013AE63 /* Build configuration list for PBXNativeTarget "SelektorMac" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2071,6 +2316,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		701849B52974C71200EFC53D /* SwiftMsgpackCsm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 70680761295D0F320013AE63 /* XCRemoteSwiftPackageReference "swift-msgpack" */;
+			productName = SwiftMsgpackCsm;
+		};
 		70680762295D0F320013AE63 /* SwiftMsgpackCsm */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 70680761295D0F320013AE63 /* XCRemoteSwiftPackageReference "swift-msgpack" */;
