@@ -10,8 +10,9 @@ import AppKit
 #else
 import UIKit
 #endif
+import RealmSwift
 
-enum ResultType: String {
+enum ResultType: String, PersistableEnum {
     case Integer = "Integer"
     case Float = "Float"
     case LegacyFloat = "LegacyFloat"
@@ -63,7 +64,9 @@ enum ResultType: String {
     }
 }
 
-enum Result : Codable, Equatable {
+enum Result : Codable, Equatable, FailableCustomPersistable {
+    typealias PersistedType = Data
+    
     case IntegerResult(integer: Int)
     case FloatResult(float: Decimal)
     case LegacyFloatResult(float: Float)
@@ -73,7 +76,77 @@ enum Result : Codable, Equatable {
     case AttributedStringResult(string: AttributedString)
     case ImageResult(imageData: Data)
     
-    func description() -> String {
+    init?(persistedValue: Data) {
+        do {
+            let data = try JSONDecoder().decode([String].self, from: persistedValue)
+            if data.count == 2, let type = ResultType(rawValue: data[0]) {
+                switch type {
+                case .String:
+                    self = .StringResult(string: data[1])
+                    return
+                case .Integer:
+                    if let i = Int(data[1]) {
+                        self = .IntegerResult(integer: i)
+                        return
+                    }
+                case .Float:
+                    if let d = Decimal(string: data[1]) {
+                        self = .FloatResult(float: d)
+                        return
+                    }
+                case .LegacyFloat:
+                    if let f = Float(data[1]) {
+                        self = .LegacyFloatResult(float: f)
+                        return
+                    }
+                case .Percent:
+                    if let d = Decimal(string: data[1]) {
+                        self = .PercentResult(value: d)
+                        return
+                    }
+                case .LegacyPercent:
+                    if let f = Float(data[1]) {
+                        self = .LegacyPercentResult(value: f)
+                        return
+                    }
+                case .AttributedString:
+                    self = .AttributedStringResult(string: AttributedString(stringLiteral: data[1]))
+                    return
+                case .Image:
+                    return nil // TODO
+                }
+            }
+        } catch {
+        }
+        return nil
+    }
+    
+    var persistableValue: Data {
+        get {
+            let obj: [String]
+            switch self {
+            case .IntegerResult(integer: let integer):
+                obj = [ResultType.Integer.rawValue, String(integer)]
+            case .FloatResult(float: let float):
+                obj = [ResultType.Float.rawValue, float.formatted()]
+            case .LegacyFloatResult(float: let float):
+                obj = [ResultType.LegacyFloat.rawValue, String(float)]
+            case .PercentResult(value: let value):
+                obj = [ResultType.Percent.rawValue, value.formatted()]
+            case .LegacyPercentResult(value: let value):
+                obj = [ResultType.LegacyPercent.rawValue, String(value)]
+            case .StringResult(string: let string):
+                obj = [ResultType.String.rawValue, string]
+            case .AttributedStringResult(_):
+                obj = [ResultType.AttributedString.rawValue, ""]
+            case .ImageResult(_):
+                obj = [ResultType.Image.rawValue, ""]
+            }
+            return try! JSONEncoder().encode(obj)
+        }
+    }
+    
+    func formatted() -> String {
         switch self {
         case let .StringResult(string: s): return s.trimmingCharacters(in: .whitespaces)
         case let .AttributedStringResult(string: s): return String(s.characters)

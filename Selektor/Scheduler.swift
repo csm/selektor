@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import CoreData
+import RealmSwift
 import BackgroundTasks
 
 #if os(iOS)
@@ -64,93 +64,91 @@ class Scheduler {
         scheduleDebounced(fromBackground)
     }
     
-    var viewContext: NSManagedObjectContext {
-        get { PersistenceController.shared.container.viewContext }
-    }
-    
     private func doScheduleConfigs(_ fromBackground: Bool) {
-        do {
-            let request = NSFetchRequest<Config>(entityName: "Config")
-            let entries = try viewContext.fetch(request)
-            let nextFire = entries.sorted {
-                a, b in a.nextFireDate < b.nextFireDate
-            }.first { config in
-                config.url != nil && config.id != nil && config.selector?.notBlank() != nil && config.resultType != nil
-            }?.nextFireDate
-            logger.info("next fire date is \(nextFire)")
-            if let nextFire = nextFire {
-                let t = max(nextFire, Date().addingTimeInterval(5.0))
-                /*let t = min(
-                    // Take the next fire date, or five seconds from now,
-                    // if the nextFire date is in the past.
-                    max(
-                        nextFire,
-                        Date().addingTimeInterval(5.0)
-                    ),
-                    // But also ensure we schedule at least at the nearest half hour
-                    Date.nextHalfHour()
-                )*/
-                logger.debug("computed next fire date \(t)")
-                if t != currentNextFire {
-                    currentNextFire = t
+        let now = Date()
+        guard let realm = try? PersistenceV2.shared.realm else {
+            logger.error("could not get realm")
+            return
+        }
+        let entries = realm.objects(ConfigV2.self)
+        logger.debug("fetched entries: \(entries)")
+        let nextFire = entries
+            .sorted(by: { a, b in a.nextFireDate < b.nextFireDate })
+            .filter { config in
+                config.url != nil && config.selector.notBlank() != nil
+            }
+            .first?
+            .nextFireDate
+        logger.info("next fire date is \(nextFire)")
+        if let nextFire = nextFire {
+            let t = max(nextFire, Date().addingTimeInterval(5.0))
+            /*let t = min(
+                // Take the next fire date, or five seconds from now,
+                // if the nextFire date is in the past.
+                max(
+                    nextFire,
+                    Date().addingTimeInterval(5.0)
+                ),
+                // But also ensure we schedule at least at the nearest half hour
+                Date.nextHalfHour()
+            )*/
+            logger.debug("computed next fire date \(t)")
+            if t != currentNextFire {
+                currentNextFire = t
 #if os(iOS)
-                    let bgNextFire = min(t, Date.nextHalfHour())
-                    // schedule background update
-                    BGTaskScheduler.shared.cancelAllTaskRequests()
-                    let backgroundRequest = BGAppRefreshTaskRequest(identifier: backgroundId)
-                    backgroundRequest.earliestBeginDate = bgNextFire
-                    do {
-                        try BGTaskScheduler.shared.submit(backgroundRequest)
-                        logger.notice("scheduled background refresh at \(backgroundRequest.earliestBeginDate?.description ?? "nil")")
-                    } catch {
-                        logger.error("could not schedule background task: \(error)")
-                    }
+                /*
+                let bgNextFire = min(t, Date.nextHalfHour())
+                // schedule background update
+                BGTaskScheduler.shared.cancelAllTaskRequests()
+                let backgroundRequest = BGAppRefreshTaskRequest(identifier: backgroundId)
+                backgroundRequest.earliestBeginDate = bgNextFire
+                do {
+                    try BGTaskScheduler.shared.submit(backgroundRequest)
+                    logger.notice("scheduled background refresh at \(backgroundRequest.earliestBeginDate?.description ?? "nil")")
+                } catch {
+                    logger.error("could not schedule background task: \(error)")
+                }
+                 */
 #endif
-                    if (!fromBackground) {
-                        operationQueue.schedule(after: OperationQueue.SchedulerTimeType(t)) {
-                            logger.debug("starting foreground download")
-                        
-                        // and schedule a foreground timer
-                        //if let t = currentTimer {
-                        //    logger.debug("invalidating current timer \(t)")
-                        //    t.invalidate()
-                        //}
-                        //let nextTimerInterval = max(currentNextFire?.timeIntervalSinceNow ?? 1.0, 1.0)
-                        //logger.debug("next timer interval: \(nextTimerInterval)")
-                        //let t = Timer(timeInterval: nextTimerInterval, repeats: false) { timer in
-                        //DispatchQueue.main.async {
-                        //    self.currentTimer = Timer.scheduledTimer(withTimeInterval: nextTimerInterval, repeats: false) { timer in
-                                do {
-                                    if let config = try PersistenceController.checkConfigToRun() {
-                                        DownloadManager.shared.downloadNow(url: config.url!, id: config.id!) {
-                                            logger.info("foreground download completed")
-                                        }
-                                    } else {
-                                        logger.debug("nothing ready to run")
-                                        self.currentNextFire = nil
-                                        self.currentTimer = nil
-                                        self.scheduleConfigs()
-                                    }
-                                } catch {
-                                    logger.error("failed to get current config: \(error)")
-                                    self.currentNextFire = nil
-                                    self.currentTimer = nil
-                                    self.scheduleConfigs()
-                                }
+                if (!fromBackground) {
+                    operationQueue.schedule(after: OperationQueue.SchedulerTimeType(t)) {
+                        logger.debug("starting foreground download")
+                        let configs = (try? PersistenceV2.shared.checkConfigsToRun()) ?? []
+                        if configs.isEmpty {
+                            logger.debug("nothing ready to run")
+                            self.currentNextFire = nil
+                            self.currentTimer = nil
+                            self.scheduleConfigs()
+                        } else {
+                            let configData = configs.map { config in
+                                (config.url!, config.id, config.selector, config.elementIndex, config.resultType)
                             }
-                        //RunLoop.main.add(t, forMode: .default)
-                        //self.currentTimer = t
-                        //    logger.info("created new timer \(self.currentTimer)")
-                        //}
+                            Task(priority: .background) {
+                                for (url, id, _, _, _) in configData {
+/*#if os(macOS)
+ FIXME, Erik is fuckin broke
+                                    do {
+                                        let result = try await ErikValueSelector.applySelector(url: url, selector: selector, elementIndex: elementIndex, resultType: resultType)
+                                        PersistenceV2.shared.handleResult(id: id, result: result, error: nil)
+                                    } catch {
+                                        PersistenceV2.shared.handleResult(id: id, result: nil, error: error)
+                                    }
+#else*/
+                                    await DownloadManager.shared.downloadNow(url: url, id: id)
+/*#endif*/
+                                }
+                                self.currentNextFire = nil
+                                self.currentTimer = nil
+                                self.scheduleConfigs()
+                            }
+                        }
                     }
-                } else {
-                    logger.info("skip scheduling again, \(t) is current next fire date")
                 }
             } else {
-                logger.error("nothing to schedule currently")
+                logger.info("skip scheduling again, \(t) is current next fire date")
             }
-        } catch {
-            logger.error("failed to schedule refresh: \(error)")
+        } else {
+            logger.error("nothing to schedule currently")
         }
     }
     

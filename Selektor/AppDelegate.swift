@@ -7,14 +7,14 @@
 
 import UIKit
 import BackgroundTasks
-import CoreData
+import RealmSwift
 import UserNotifications
-//import SwiftMsgPack
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     var currentTimer: Timer? = nil
     
     var inForeground: Bool = false
+    private var refreshGroup = DispatchGroup()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOption: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: backgroundId, using: nil) { (task) in
@@ -55,6 +55,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             } catch {
                 logger.error("failed to register push token: \(error)")
             }
+            do {
+                try await PushManager.shared.updateSchedules()
+            } catch {
+                logger.error("failed to update schedules: \(error)")
+            }
         }
     }
     
@@ -73,6 +78,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
         
     func migrateDb() {
+        /*
         do {
             let viewContext = PersistenceController.shared.container.viewContext
             let request = NSFetchRequest<Config>(entityName: "Config")
@@ -141,6 +147,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         } catch {
             logger.warning("could not migrate DB: \(error)")
         }
+         */
     }
     
     /*func applicationDidEnterBackground(_ application: UIApplication) {
@@ -155,27 +162,35 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     func runRefresh(completion: @escaping () -> Void) {
         let queue = DownloadManager.shared.backgroundDelegateQueue
-        queue.addOperation {
-            do {
-                if let config = try PersistenceController.checkConfigToRun() {
-                    if let id = config.id, let url = config.url {
-                        logger.notice("starting download for config (\(config.name))")
-                        DownloadManager.shared.startDownload(url: url, with: [configIdHeaderKey: id.uuidString], completion: completion)
+        do {
+            let configs = try PersistenceV2.shared.checkConfigsToRun()
+            if !configs.isEmpty {
+                for config in configs {
+                    if let url = config.url {
+                        let id = config.id
+                        let name = config.name
+                        refreshGroup.enter()
+                        queue.addOperation {
+                            logger.notice("starting download for config (\(name))")
+                            DownloadManager.shared.startDownload(url: url, with: [configIdHeaderKey: id.stringValue], completion: {
+                                self.refreshGroup.leave()
+                            })
+                        }
                     }
-                } else {
-                    logger.notice("no task to run")
-                    Scheduler.shared.scheduleConfigs(true)
                 }
-            } catch {
-                logger.error("failed to pull refresh \(error)")
+                refreshGroup.notify(queue: .main) {
+                    completion()
+                }
+            } else {
+                logger.notice("no task to run")
                 Scheduler.shared.scheduleConfigs(true)
+                completion()
             }
+        } catch {
+            logger.error("failed to pull refresh \(error)")
+            Scheduler.shared.scheduleConfigs(true)
+            completion()
         }
-        /*
-        queue.operations.last?.completionBlock = {
-            task.setTaskCompleted(success: true)
-        }
-         */
     }
     
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {

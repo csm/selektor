@@ -42,7 +42,7 @@ extension Config {
                     self.lastValue = nil
                 }
             } catch {
-                logger.error("failed to encode value \(newValue?.description() ?? "nil"): \(error)")
+                logger.error("failed to encode value \(newValue?.formatted() ?? "nil"): \(error)")
                 self.lastValue = nil
             }
         }
@@ -108,7 +108,7 @@ extension History {
                     self.resultData = nil
                 }
             } catch {
-                logger.error("failed to encode value \(newValue?.description() ?? "nil"): \(error)")
+                logger.error("failed to encode value \(newValue?.formatted() ?? "nil"): \(error)")
                 self.resultData = nil
             }
         }

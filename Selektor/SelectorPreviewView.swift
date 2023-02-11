@@ -7,23 +7,36 @@
 
 import SwiftUI
 import WebKit
+import RealmSwift
 
 struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.realm) var realm
     
-    @ObservedObject var config: Config
+    @ObservedRealmObject var config: ConfigV2
+
     @State var selector: String = ""
     @State var highlightedSelector: String? = nil
     @State var highlightedIndex: Int = 0
     @State var result: Result? = nil
     @State var url: URL? = nil
-    @State var resultIndexText: String = "1"
+    @State var elementIndex: Int = 0
     private let webView: WKWebView
     private let monitorClicksJs: String
     
     static let downloadDir = {
         let userDir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
         let dir = URL(fileURLWithPath: userDir).appendingPathComponent("preview")
+        do {
+            var isDir: ObjCBool = false
+            if FileManager.default.fileExists(atPath: dir.path, isDirectory: &isDir) {
+                if !isDir.boolValue {
+                    try FileManager.default.removeItem(at: dir)
+                }
+            }
+        } catch {
+            logger.warning("could not remove existing file: \(error)")
+        }
         do {
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         } catch {
@@ -35,7 +48,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
         return downloadDir.appendingPathComponent("selektor-preview.html")
     }()
     
-    init(config: Config) {
+    init(config: ConfigV2) {
         self.config = config
         let pagePreferences = WKWebpagePreferences()
         let preferences = WKPreferences()
@@ -66,9 +79,14 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
                 Button ("OK") {
                     NavigationDelegateImpl.shared.unregisterListener(listener: self)
                     ScriptMessageHandlerImpl.shared.unregisterHandler(handler: self)
-                    config.selector = selector
-                    if let i = Int32(resultIndexText) {
-                        config.elementIndex = i - 1
+                    do {
+                        try realm.write {
+                            let update = realm.object(ofType: ConfigV2.self, forPrimaryKey: config.id)
+                            update?.selector = selector
+                            update?.elementIndex = elementIndex
+                        }
+                    } catch {
+                        logger.error("could not save config: \(error)")
                     }
                     dismiss()
                 }
@@ -80,7 +98,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
             HStack {
                 Text("Element Index").font(labelFont)
                 Spacer()
-                TextField(text: $resultIndexText) {
+                TextField(text: $elementIndex.oneBasedStringBinding()) {
                     Text("Result Index")
                 }.frame(maxWidth: 100, alignment: .trailing)
                     .keyboardType(.numberPad)
@@ -89,15 +107,15 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
             HStack {
                 Text("Result").font(labelFont)
                 Spacer()
-                Text(result?.description() ?? "").foregroundColor(.gray)
+                Text(result?.formatted() ?? "").foregroundColor(.gray)
             }.padding(.all, 8)
             //}.listStyle(.grouped)
             WebView(webView: webView).frame(maxWidth: 10000, maxHeight: 10000)
         }.onAppear {
             NavigationDelegateImpl.shared.registerListener(listener: self)
             ScriptMessageHandlerImpl.shared.registerHandler(handler: self)
-            self.selector = config.selector ?? ""
-            self.resultIndexText = "\(config.elementIndex + 1)"
+            self.selector = config.selector
+            self.elementIndex = config.elementIndex
             self.url = config.url
             if let u = url {
                 Task() { await downloadPage(url: u) }
@@ -106,7 +124,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
     }
     
     var id: String {
-        get { config.id!.uuidString }
+        get { config.id.stringValue }
     }
     
     func isEqual(that: OnCommitHandler) -> Bool {
@@ -142,7 +160,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
     
     func downloadPage(url: URL) async {
         var request = URLRequest(url: url)
-        request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
+        request.setValue(safariUserAgent, forHTTPHeaderField: "User-agent")
         request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
         request.setValue("en", forHTTPHeaderField: "Accept-Language")
         do {
@@ -163,9 +181,9 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
         let decoder = JSONDecoder()
         do {
             if let d = text.data(using: .utf8) {
-                let result = try decoder.decode(ElementSelectResult.self, from: d)
-                self.selector = result.selector
-                self.resultIndexText = "\(result.index + 1)"
+                let selectResult = try decoder.decode(ElementSelectResult.self, from: d)
+                self.selector = selectResult.selector
+                self.elementIndex = selectResult.index
                 Task() { await onSelectorChange() }
             } else {
                 logger.warning("couldn't encode \(text) as data")
@@ -177,9 +195,9 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
     
     func onSelectorChange() async {
         do {
-            if let s = selector.notBlank(), let i = Int(resultIndexText), i > 0 {
-                if let elementText = try await webView.evaluateJavaScript("document.querySelectorAll(\"\(s)\")[\(i-1)].innerHTML;") as? String {
-                    result = try? ValueSelector.decodeResult(text: elementText, resultType: ResultType.from(tag: config.resultType) ?? .String)
+            if let s = selector.notBlank() {
+                if let elementText = try await webView.evaluateJavaScript("document.querySelectorAll(\"\(s)\")[\(elementIndex)].innerHTML;") as? String {
+                    result = try? ValueSelector.decodeResult(text: elementText, resultType: config.resultType)
                 }
             }
             runHighlighter()
@@ -189,7 +207,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
     }
     
     func runHighlighter() {
-        if let s = self.selector.notBlank(), let i = Int(self.resultIndexText) {
+        if let s = self.selector.notBlank() {
             let clearCode: String
             if let prev = self.highlightedSelector {
                 clearCode = """
@@ -204,7 +222,7 @@ if (oldElement) {
             }
             let jsCode = """
 \(clearCode)
-var element = document.querySelectorAll("\(s)")[\(i - 1)];
+var element = document.querySelectorAll("\(s)")[\(elementIndex)];
 if (element) {
   element.style.outline = "10000vmax solid rgba(0, 0, 0, .5)";
   //element.style.boxShadow = "0 0 0 1000vmax rgba(0, 0, 0, .5)";
@@ -216,9 +234,9 @@ true;
                 logger.notice("JS highlighter execution result \(String(describing: result)) error \(error)")
             }
             self.highlightedSelector = self.selector
-            self.highlightedIndex = i - 1
+            self.highlightedIndex = elementIndex
             let queryCode = """
-document.querySelectorAll("\(s)")[\(i - 1)]
+document.querySelectorAll("\(s)")[\(elementIndex)]
 """
         }
     }
@@ -229,7 +247,7 @@ document.querySelectorAll("\(s)")[\(i - 1)]
 struct SelectorPreviewView_Previews: PreviewProvider {
     static var previews: some View {
         SelectorPreviewView(config: {
-            let config = Config(context: PersistenceController.preview.container.viewContext)
+            let config = ConfigV2(index: 0, name: "Test Config")
             config.url = URL(string: "https://duckduckgo.com/")
             return config
         }())

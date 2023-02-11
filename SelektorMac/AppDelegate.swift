@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import RealmSwift
 import SwiftUI
 
 @main
@@ -15,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @IBOutlet weak var menu: NSMenu?
     @IBOutlet weak var firstItem: NSMenuItem?
     
-    var displayedConfigs: [Config] = []
+    var displayedConfigs: [ConfigV2] = []
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         Scheduler.shared.scheduleConfigs()
@@ -36,10 +37,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     
     @objc func menuNeedsUpdate(_ menu: NSMenu) {
         if menu == self.menu {
-            let viewContext = PersistenceController.shared.container.viewContext
-            let fetchRequest = NSFetchRequest<Config>(entityName: "Config")
-            fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Config.index, ascending: true)]
-            fetchRequest.fetchLimit = 15
             let menuItems = menu.items
             let keepItems = menuItems.drop { item in
                 item != firstItem
@@ -48,12 +45,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 menu.removeItem(item)
             }
             do {
-                let results = try viewContext.fetch(fetchRequest)
-                if results.isEmpty {
-                    menu.insertItem(NSMenuItem(title: "No Items", action: nil, keyEquivalent: ""), at: 0)
+                let realm = try PersistenceV2.shared.realm
+                displayedConfigs = Array(realm.objects(ConfigV2.self).sorted(by: { (a, b) in a.index < b.index }).prefix(15))
+                if displayedConfigs.isEmpty {
+                    menu.insertItem(NSMenuItem(title: "No Items, add one by opening Settings.", action: nil, keyEquivalent: ""), at: 0)
                 } else {
-                    displayedConfigs = results
-                    for (index, config) in results.enumerated() {
+                    for (index, config) in displayedConfigs.enumerated() {
                         let item = NSMenuItem(title: "", action: nil, keyEquivalent: "")
                         switch index {
                         case 0:
@@ -120,7 +117,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                             .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
                         ]
                         let nameContent = wordWrap(config.name ?? "New Config", limit: 150, font: NSFont.systemFont(ofSize: NSFont.systemFontSize))
-                        let resultContent = wordWrap(config.result?.description() ?? "", limit: 143, font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize))
+                        let resultContent = wordWrap(config.lastValue?.formatted() ?? "", limit: 143, font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize))
                         let nameContentPadded = pad(array: nameContent, to: resultContent.count, with: "")
                         let resultContentPadded = pad(array: resultContent, to: nameContent.count, with: "")
                         let content = zip(nameContentPadded, resultContentPadded).map {
@@ -142,6 +139,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 }
             } catch {
                 logger.error("error fetching configs: \(error)")
+                menu.addItem(NSMenuItem(title: "Error loading configs: \(error.localizedDescription).", action: nil, keyEquivalent: ""))
             }
 #if DEBUG
             menu.addItem(NSMenuItem(title: "Debug Logs", action: #selector(showDebugLogs(_:)), keyEquivalent: ""))
@@ -150,34 +148,35 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
     
+#if DEBUG
     @objc func showDebugLogs(_ sender: Any?) {
         LogsView().openWindow(with: "Debug Logs", level: .modalPanel, size: CGSize(width: 4808, height: 640))
     }
+#endif
     
     @IBAction
     @objc func openSettings(_ sender: Any?) {
+        
         SettingsView()
-            .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
+            .environment(\.realm, try! PersistenceV2.shared.realm)
             .openWindow(with: "Selektor", level: .modalPanel, size: CGSize(width: 640, height: 480))
     }
     
     @IBAction
     @objc func openSubscription(_ sender: Any?) {
-        SubscribeView().padding(.all).openWindow(
+        SubscribeView().padding(.all).frame(minWidth: 314, minHeight: 231).openWindow(
             with: "Selektor",
             level: .modalPanel,
-            size: CGSize(width: 314, height: 256)
+            size: CGSize(width: 314, height: 231)
         )
     }
     
     func configEntryClicked(_ sender: Any?, index: Int) {
         if index < displayedConfigs.count {
             let config = displayedConfigs[index]
-            if let id = config.id {
-                HistoryView(id: id, name: config.name ?? "")
-                    .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
-                    .openWindow(with: "", level: .modalPanel, size: CGSize(width: 640, height: 480))
-            }
+            HistoryView(id: config.id, name: config.name ?? "")
+                .environment(\.realm, try! PersistenceV2.shared.realm)
+                .openWindow(with: "", level: .modalPanel, size: CGSize(width: 640, height: 480))
         }
     }
     

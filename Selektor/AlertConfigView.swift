@@ -6,25 +6,27 @@
 //
 
 import SwiftUI
+import RealmSwift
 import UserNotifications
 
 struct AlertConfigView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.realm) private var realm
     @Environment(\.dismiss) private var dismiss
     
-    @ObservedObject var config: Config
+    let id: ObjectId
     
     @State var alertType: AlertType = .none
-    @State var compareAmount: String = ""
+    @State var compareAmount: Decimal = Decimal(0)
+    @State var orEquals: Bool = false
+    @State var playSound: Bool = false
+    @State var timeSensitive: Bool = false
     
     var body: some View {
         VStack {
-#if os(iOS)
             HStack(alignment: .center) {
                 Text("Alert Config").font(.system(size: 18, weight: .black).lowercaseSmallCaps())
             }
-#endif
-            List {
+            SwiftUI.List {
                 Section {
                     HStack {
                         Text("None")
@@ -96,14 +98,10 @@ struct AlertConfigView: View {
                         switch alertType {
                         case let .valueIsGreaterThan(_, equals):
                             HStack {
-                                TextField("value", text: $compareAmount)
-#if os(iOS)
+                                TextField("value", text: ($compareAmount).stringBinding())
                                     .keyboardType(.numberPad)
-#endif
                                     .onSubmit {
-                                        if let f = Decimal(string: compareAmount) {
-                                            alertType = .valueIsGreaterThan(value: f, orEquals: equals)
-                                        }
+                                        alertType = .valueIsGreaterThan(value: compareAmount, orEquals: equals)
                                     }.frame(maxWidth: 30, alignment: .trailing)
                                 Image(systemName: "checkmark")
                                     .frame(width: 12, height: 12)
@@ -119,8 +117,8 @@ struct AlertConfigView: View {
                                 do {
                                     if try await checkNotificationPermission() {
                                         DispatchQueue.main.async {
-                                            compareAmount = "0"
-                                            alertType = .valueIsGreaterThan(value: 0.0)
+                                            compareAmount = Decimal()
+                                            alertType = .valueIsGreaterThan(value: compareAmount)
                                         }
                                     }
                                 } catch {
@@ -155,15 +153,12 @@ struct AlertConfigView: View {
                         switch alertType {
                         case let .valueIsLessThan(_, equals):
                             HStack {
-                                TextField("value", text: $compareAmount)
-#if os(iOS)
+                                TextField("value", text: ($compareAmount).stringBinding())
                                     .keyboardType(.numberPad)
-#endif
                                     .onSubmit {
-                                        if let f = Decimal(string: compareAmount) {
-                                            alertType = .valueIsLessThan(value: f, orEquals: equals)
-                                        }
-                                    }.frame(maxWidth: 30, alignment: .trailing)
+                                        alertType = .valueIsLessThan(value: compareAmount, orEquals: equals)
+                                    }
+                                    .frame(maxWidth: 30, alignment: .trailing)
                                 Image(systemName: "checkmark")
                                     .resizable()
                                     .frame(width: 12, height: 12)
@@ -179,8 +174,8 @@ struct AlertConfigView: View {
                                 do {
                                     if try await checkNotificationPermission() {
                                         DispatchQueue.main.async {
-                                            compareAmount = "0"
-                                            alertType = .valueIsLessThan(value: 0.0)
+                                            compareAmount = Decimal()
+                                            alertType = .valueIsLessThan(value: compareAmount)
                                         }
                                     }
                                 } catch {
@@ -211,35 +206,43 @@ struct AlertConfigView: View {
                 }
                 
                 Section {
-                    Toggle("Play Sound", isOn: $config.alertSound).toggleStyle(.switch)
-                    Toggle("Time Sensitive", isOn: $config.alertTimeSensitive).toggleStyle(.switch)
+                    Toggle("Play Sound", isOn: $playSound).toggleStyle(.switch)
+                    Toggle("Time Sensitive", isOn: $timeSensitive).toggleStyle(.switch)
                 }
-            }.onAppear {
+            }
+        }.onAppear {
+            if let config = realm.object(ofType: ConfigV2.self, forPrimaryKey: id) {
                 alertType = config.alertType
-            }.onDisappear {
-                config.alertType = alertType
-            }
-#if os(macOS)
-            .listStyle(.bordered(alternatesRowBackgrounds: true))
-#endif
-#if os(macOS)
-            HStack {
-                Spacer()
-                Button("Cancel") {
-                    print("cancel")
-                    dismiss()
-                }
-                Button("OK") {
-                    print("ok TODO save values")
-                    config.alertType = alertType
-                    dismiss()
+                switch alertType {
+                case let .valueIsLessThan(value, orEq):
+                    compareAmount = value
+                    orEquals = orEq
+                case let .valueIsGreaterThan(value, orEq):
+                    compareAmount = value
+                    orEquals = orEq
+                default: break
                 }
             }
-#endif
+        }.onDisappear {
+            do {
+                try realm.write {
+                    if let config = realm.object(ofType: ConfigV2.self, forPrimaryKey: id) {
+                        switch alertType {
+                        case .none, .everyTime, .valueChanged:
+                            config.alertType = alertType
+                        case .valueIsGreaterThan(_, let orEquals):
+                            config.alertType = .valueIsGreaterThan(value: compareAmount, orEquals: orEquals)
+                        case .valueIsLessThan(_, let orEquals):
+                            config.alertType = .valueIsLessThan(value: compareAmount, orEquals: orEquals)
+                        }
+                        config.alertSound = playSound
+                        config.alertTimeSensitive = timeSensitive
+                    }
+                }
+            } catch {
+                logger.warning("could not save: \(error)")
+            }
         }
-#if os(macOS)
-        .frame(width: 250, height: 225)
-#endif
     }
     
     func checkNotificationPermission() async throws -> Bool {
@@ -254,6 +257,6 @@ struct AlertConfigView: View {
 
 struct AlertConfigView_Previews: PreviewProvider {
     static var previews: some View {
-        AlertConfigView(config: Config(context: PersistenceController.preview.container.viewContext)).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        AlertConfigView(id: ObjectId())
     }
 }

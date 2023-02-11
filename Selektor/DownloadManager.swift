@@ -8,6 +8,7 @@
 import Foundation
 import CoreData
 import UserNotifications
+import RealmSwift
 
 #if os(iOS)
 import WatchConnectivity
@@ -60,7 +61,7 @@ class DownloadManager: NSObject, ObservableObject {
         headers.forEach { (k, v) in
             request.setValue(v, forHTTPHeaderField: k)
         }
-        request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
+        request.setValue(safariUserAgent, forHTTPHeaderField: "User-agent")
         request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
         request.setValue("en", forHTTPHeaderField: "Accept-Language")
         let task = backgroundSession!.downloadTask(with: request)
@@ -68,13 +69,21 @@ class DownloadManager: NSObject, ObservableObject {
         tasks.append(task)
     }
     
-    func downloadNow(url: URL, id: UUID, with headers: Dictionary<String, String> = [:], decodeDownload: Bool = true, completionHandler: @escaping () -> Void) {
+    func downloadNow(url: URL, id: ObjectId, with headers: Dictionary<String, String> = [:], decodeDownload: Bool = true) async {
+        await withUnsafeContinuation { cont in
+            downloadNow(url: url, id: id, with: headers) {
+                cont.resume()
+            }
+        }
+    }
+    
+    func downloadNow(url: URL, id: ObjectId, with headers: Dictionary<String, String> = [:], decodeDownload: Bool = true, completionHandler: @escaping () -> Void) {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         request.attribution = .user
         headers.forEach { (k, v) in
             request.setValue(v, forHTTPHeaderField: k)
         }
-        request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
+        request.setValue(safariUserAgent, forHTTPHeaderField: "User-agent")
         request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
         request.setValue("en", forHTTPHeaderField: "Accept-Language")
         let task = foregroundSession!.downloadTask(with: request) { location, response, error in
@@ -120,7 +129,7 @@ extension DownloadManager : URLSessionDelegate, URLSessionDownloadDelegate {
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         logger.debug("urlSession \(session) downloadTask: \(downloadTask) didFinishDownloadingTo: \(location)")
-        if let request = downloadTask.currentRequest, let idStr = request.value(forHTTPHeaderField: configIdHeaderKey), let id = UUID(uuidString: idStr), let response = downloadTask.response {
+        if let request = downloadTask.currentRequest, let idStr = request.value(forHTTPHeaderField: configIdHeaderKey), let id = try? ObjectId(string: idStr), let response = downloadTask.response {
             self.handleDownload(response, id, location, nil, true)
         } else {
             logger.info("no UUID header or bad one: \(downloadTask.currentRequest?.value(forHTTPHeaderField: configIdHeaderKey))")
@@ -136,7 +145,7 @@ extension DownloadManager : URLSessionDelegate, URLSessionDownloadDelegate {
         logger.debug("urlSession \(session) task: \(task) didCompleteWithError: \(error)")
         self.tasks = self.tasks.filter { t in t != task }
         if let error = error {
-            if let idStr = task.currentRequest?.value(forHTTPHeaderField: configIdHeaderKey), let id = UUID(uuidString: idStr), let response = task.response {
+            if let idStr = task.currentRequest?.value(forHTTPHeaderField: configIdHeaderKey), let id = try? ObjectId(string: idStr), let response = task.response {
                 self.handleDownload(response, id, nil, error, true)
             } else {
                 logger.info("no UUID header or bad one: \(task.currentRequest?.value(forHTTPHeaderField: configIdHeaderKey))")
@@ -157,9 +166,9 @@ extension DownloadManager : URLSessionDelegate, URLSessionDownloadDelegate {
 #if os(iOS)
 class DownloadManagerWatchDelegate : NSObject, WCSessionDelegate {
     let result: Result
-    let config: Config
+    let config: ConfigV2
     
-    init(result: Result, config: Config) {
+    init(result: Result, config: ConfigV2) {
         self.result = result
         self.config = config
         super.init()
@@ -169,11 +178,11 @@ class DownloadManagerWatchDelegate : NSObject, WCSessionDelegate {
         switch activationState {
         case .activated:
             if session.isPaired {
-                if let id = config.id, let name = config.name, let lastFetch = config.lastFetch {
+                if let lastFetch = config.lastFetch {
                     let payload: [String: Any] = [
-                        WatchPayloadKey.configId.rawValue: id.uuidString,
-                        WatchPayloadKey.configName.rawValue: name,
-                        WatchPayloadKey.resultString.rawValue: result.description(),
+                        WatchPayloadKey.configId.rawValue: config.id.stringValue,
+                        WatchPayloadKey.configName.rawValue: config.name,
+                        WatchPayloadKey.resultString.rawValue: result.formatted(),
                         WatchPayloadKey.updatedDate.rawValue: lastFetch,
                         WatchPayloadKey.operation.rawValue: WatchUpdateOperation.update.rawValue,
                         WatchPayloadKey.index.rawValue: config.index
@@ -197,7 +206,7 @@ class DownloadManagerWatchDelegate : NSObject, WCSessionDelegate {
 #endif
 
 extension DownloadManager {
-    func notifyAppleWatch(result: Result, config: Config) {
+    func notifyAppleWatch(result: Result, config: ConfigV2) {
 #if os(iOS)
         if WCSession.isSupported() {
             let session = WCSession.default
@@ -208,35 +217,36 @@ extension DownloadManager {
 #endif
     }
     
-    func emitNotification(result: Result, config: Config) {
+    func emitNotification(result: Result, config: ConfigV2) {
         let content = UNMutableNotificationContent()
-        content.title = config.name ?? "Selektor Value Updated"
+        content.title = config.name
+        logger.info("emitting notification for result: \(result)")
         switch config.alertType {
         case .everyTime:
-            switch config.result {
+            switch config.lastValue {
             case let .StringResult(s):
                 content.body = s
             default:
-                content.body = "Latest value is \(result.description())."
+                content.body = "Latest value is \(result.formatted())."
             }
         case .valueChanged:
-            switch config.result {
+            switch config.lastValue {
             case let .StringResult(s):
                 content.body = s
             default:
-                content.body = "Value changed to \(result.description())."
+                content.body = "Value changed to \(result.formatted())."
             }
         case let .valueIsLessThan(value, equals):
             if equals {
-                content.body = "New value \(result.description()) is less than or equal to \(value)."
+                content.body = "New value \(result.formatted()) is less than or equal to \(value)."
             } else {
-                content.body = "New value \(result.description()) is less than \(value)."
+                content.body = "New value \(result.formatted()) is less than \(value)."
             }
         case let .valueIsGreaterThan(value, equals):
             if equals {
-                content.body = "New value \(result.description()) is greater than or equal to \(value)."
+                content.body = "New value \(result.formatted()) is greater than or equal to \(value)."
             } else {
-                content.body = "New value \(result.description()) is greater than \(value)."
+                content.body = "New value \(result.formatted()) is greater than \(value)."
             }
         default: return
         }
@@ -276,23 +286,21 @@ extension DownloadManager {
         return .utf8
     }
     
-    func handleDownload(_ response: URLResponse?, _ id: UUID, _ location: URL?, _ error: Error?, _ fromBackground: Bool = false) {
-        let viewContext = PersistenceController.shared.container.viewContext
-        let request = NSFetchRequest<Config>(entityName: "Config")
-        request.predicate = NSPredicate(format: "id = %@", argumentArray: [id])
+    func handleDownload(_ response: URLResponse?, _ id: ObjectId, _ location: URL?, _ error: Error?, _ fromBackground: Bool = false) {
         do {
-            let results = try viewContext.fetch(request)
-            if let config = results.first, let u = location, let s = config.selector, let ts = config.resultType, let t = ResultType.from(tag: ts) {
+            let realm = try PersistenceV2.shared.realm
+            let results = realm.object(ofType: ConfigV2.self, forPrimaryKey: id)
+            if let config = results, let u = location, let s = config.selector.notBlank() {
                 let result: Result?
                 let err: Error?
                 do {
-                    result = try ValueSelector.applySelector(location: u, selector: s, resultIndex: Int(config.elementIndex), resultType: t, documentEncoding: DownloadManager.stringEncoding(response: response))
+                    result = try ValueSelector.applySelector(location: u, selector: s, resultIndex: Int(config.elementIndex), resultType: config.resultType, documentEncoding: DownloadManager.stringEncoding(response: response))
                     err = nil
                 } catch {
                     result = nil
                     err = error
                 }
-                let oldResult = config.result
+                let oldResult = config.lastValue
                 if let result = result {
                     if config.isWatchWidget {
                         notifyAppleWatch(result: result, config: config)
@@ -347,33 +355,18 @@ extension DownloadManager {
                         }
                     }
                 }
-                config.lastFetch = Date()
-                config.result = result
-                config.lastError = err?.localizedDescription
-                let newHistory = History(context: viewContext)
-                newHistory.id = UUID()
-                newHistory.date = Date()
-                newHistory.configId = id
-                newHistory.result = result
-                newHistory.error = err?.localizedDescription
-                try DispatchQueue.main.sync {
-                    try viewContext.save()
-                    logger.debug("saved results to persistent store")
-                }
-                let historyRequest = NSFetchRequest<History>(entityName: "History")
-                historyRequest.predicate = NSPredicate(format: "configId = %@", argumentArray: [id])
-                historyRequest.sortDescriptors = [NSSortDescriptor(keyPath: \History.date, ascending: true)]
-                let history = try viewContext.fetch(historyRequest)
-                if history.count > 20 {
-                    let h = history.dropLast(20)
-                    logger.debug("dropping \(h.count) old history entries")
-                    h.forEach { e in
-                        viewContext.delete(e)
+                try realm.write {
+                    config.lastFetch = Date()
+                    config.lastValue = result
+                    config.lastError = err?.localizedDescription
+                    let newHistory = HistoryV2(configId: config.id, date: Date(), error: err?.localizedDescription, result: result)
+                    let oldHistory = realm.objects(HistoryV2.self).where { h in
+                        h.configId == config.id
+                    }.sorted(by: { a, b in a.date < b.date }).dropLast(19)
+                    for h in oldHistory {
+                        realm.delete(h)
                     }
-                    try DispatchQueue.main.sync {
-                        try viewContext.save()
-                        logger.debug("updated history depth in persistent store")
-                    }
+                    realm.add(newHistory)
                 }
             }
         } catch {

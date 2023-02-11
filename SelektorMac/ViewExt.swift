@@ -32,6 +32,7 @@ extension View {
         window.level = level
         window.makeKeyAndOrderFront(self)
         window.makeMain()
+        window.makeKey()
         window.contentView = NSHostingView(rootView: self.environment(\.window, window))
     }
 }

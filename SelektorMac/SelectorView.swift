@@ -5,16 +5,13 @@
 //  Created by Casey Marshall on 1/3/23.
 //
 
+import RealmSwift
 import SwiftUI
 
 struct SelectorView: View {
-    var viewContext: NSManagedObjectContext {
-        get { PersistenceController.shared.container.viewContext }
-    }
+    @Environment(\.realm) var realm
     
-    @ObservedObject var config: Config
-    
-    var saveConfig: () -> Void = {}
+    @ObservedRealmObject var config: ConfigV2
     
     @State var isDownloaded = false
     
@@ -24,49 +21,53 @@ struct SelectorView: View {
     @State var showingError: Bool = false
     @State var showingAlertConfig: Bool = false
     
+    @State var greaterThanValue: Decimal = Decimal()
+    @State var greaterThanOrEquals: Bool = false
+    @State var lessThanValue: Decimal = Decimal()
+    @State var lessThanOrEquals: Bool = false
+    
+    static let labelWidth: CGFloat = 100
+    
     static let downloadPath = {
         let userDir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
         let userDirUrl = URL(fileURLWithPath: userDir)
         return userDirUrl.appendingPathComponent("selektor-data.html")
     }()
     
-    init(config: Config) {
+    init(config: ConfigV2) {
         self.config = config
-        self.saveConfig = debounce(interval: 5000, queue: .main, action: self.doSaveConfig)
+    }
+    
+    var maxIndex: Int {
+        get {
+            let results = realm.objects(ConfigV2.self)
+            return Int(results.map { config in config.index }.max()!)
+        }
     }
     
     var mainConfigs: some View {
         Group {
-            HStack {
-                Spacer()
-                Button("Delete") {
-                    PersistenceController.shared.deleteConfig(config: config)
-                }.foregroundColor(.red)
-            }
-            TextField("", text: ($config.name).safeBinding(defaultValue: "")).onSubmit {
-                PersistenceController.shared.deleteConfig(config: config)
-                saveConfig()
-            }
+            TextField("", text: $config.name)
             HStack {
                 Text("https://").foregroundColor(.gray)
                 TextField("www.example.com/path", text: ($config.url).stringBinding()).onSubmit {
                     Task() {
                         await downloadUrl()
                     }
-                    saveConfig()
                 }
             }
-            Text("Selector")
-            MultilineTextField(placeholder: "Selector", text: ($config.selector).safeBinding(defaultValue: ""), onCommit: {
+            HStack {
+                Text("Selector").font(.system(.body, weight: .semibold))
+                Spacer()
+            }
+            MultilineTextField(placeholder: "Selector", text: ($config.selector), onCommit: {
                 onSelectorChange()
-                saveConfig()
             })
             HStack {
-                Text("Result Number")
+                Text("Result Number").frame(width: SelectorView.labelWidth, alignment: .trailing).font(.system(.body, weight: .semibold))
                 Spacer()
                 TextField("Result Number", text: ($config.elementIndex).oneBasedStringBinding()).onSubmit {
                     onSelectorChange()
-                    saveConfig()
                 }
             }
         }
@@ -75,33 +76,48 @@ struct SelectorView: View {
     var mainConfigs2: some View {
         Group {
             HStack {
-                Picker("Decode As", selection: ($config.resultType).resultTypeBinding()) {
+                Text("Decode As").frame(width: SelectorView.labelWidth, alignment: .trailing).font(.system(.body, weight: .semibold))
+                Picker("", selection: $config.resultType) {
                     Text("Text").tag(ResultType.String)
                     Text("Number").tag(ResultType.Float)
                     Text("Percent").tag(ResultType.Percent)
                 }.onSubmit {
                     onSelectorChange()
-                    saveConfig()
                 }
             }
             HStack {
-                Text("Refresh")
+                Text("Refresh").frame(width: SelectorView.labelWidth, alignment: .trailing).font(.system(.body, weight: .semibold))
                 Spacer()
-                TextField("", text: ($config.triggerInterval).stringBinding()).onSubmit {
-                    saveConfig()
+                TextField("", text: ($config.triggerInterval).valueBinding().stringBinding()).onSubmit {
+                    Scheduler.shared.scheduleConfigs()
                 }
-                Picker("", selection: ($config.triggerIntervalUnits).timeUnitBinding()) {
+                Picker("", selection: ($config.triggerInterval).unitsBinding()) {
                     Text("Seconds").tag(TimeUnit.Seconds)
                     Text("Minutes").tag(TimeUnit.Minutes)
                     Text("Hours").tag(TimeUnit.Hours)
                     Text("Days").tag(TimeUnit.Days)
                 }.onSubmit {
-                    saveConfig()
+                    Scheduler.shared.scheduleConfigs()
                 }
             }
-            Toggle("Show in Widget", isOn: $config.isWidget).toggleStyle(.switch).onSubmit {
-                saveConfig()
-            }.scaledToFill()
+            HStack {
+                Text("Show in Widget").frame(width: SelectorView.labelWidth, alignment: .trailing).font(.system(.body, weight: .semibold))
+                Toggle("", isOn: $config.isWidget).toggleStyle(.switch).onSubmit {
+                    do {
+                        try realm.write {
+                            let configs = realm.objects(ConfigV2.self)
+                            configs.filter { c in c.id != config.id }.forEach { c in
+                                if c.isWidget {
+                                    c.isWidget = false
+                                }
+                            }
+                        }
+                    } catch {
+                        logger.error("error toggling other configs off: \(error)")
+                    }
+                }.scaledToFill()
+                Spacer()
+            }
         }
     }
     
@@ -109,56 +125,74 @@ struct SelectorView: View {
         VStack {
             mainConfigs
             mainConfigs2
-            HStack {
-                Button("Alert Config") {
-                    showingAlertConfig = true
-                    //AlertConfigView(config: config)
-                        //.environment(\.managedObjectContext, viewContext)
-                        //.padding(.all)
-                        //.openWindow(with: "Alert Config", level: .statusBar, size: CGSize(width: 320, height: 240))
-                }
+            HStack(alignment: .top) {
+                Text("Alert").frame(width: SelectorView.labelWidth, alignment: .trailing).font(.system(.body, weight: .semibold))
+                Picker("", selection: $config.alertType) {
+                    Text("None").tag(AlertType.none)
+                    Text("Every Time").tag(AlertType.everyTime)
+                    Text("On Change").tag(AlertType.valueChanged)
+                    HStack {
+                        Text("Less Than")
+                        TextField("", text: $lessThanValue.stringBinding()).disabled(!isLessThan())
+                            .onSubmit {
+                                config.alertType = .valueIsLessThan(value: lessThanValue, orEquals: lessThanOrEquals)
+                            }
+                        Toggle("Or Equals", isOn: $lessThanOrEquals).toggleStyle(.checkbox).disabled(!isLessThan()).onSubmit {
+                            config.alertType = .valueIsLessThan(value: lessThanValue, orEquals: lessThanOrEquals)
+                        }
+                    }
+                    .tag(AlertType.valueIsLessThan(value: Decimal(), orEquals: false))
+                    HStack {
+                        Text("Greater Than")
+                        TextField("", text: $greaterThanValue.stringBinding()).disabled(!isGreaterThan())
+                            .onSubmit {
+                                config.alertType = .valueIsGreaterThan(value: greaterThanValue, orEquals: greaterThanOrEquals)
+                            }
+                        Toggle("Or Equals", isOn: $greaterThanOrEquals).toggleStyle(.checkbox).disabled(!isGreaterThan()).onSubmit {
+                            config.alertType = .valueIsGreaterThan(value: greaterThanValue, orEquals: greaterThanOrEquals)
+                        }
+                    }
+                    .tag(AlertType.valueIsGreaterThan(value: Decimal(), orEquals: false))
+                }.pickerStyle(.radioGroup)
+
                 Spacer()
-                switch config.alertType {
-                case .none:
-                    Text("None")
-                case .everyTime:
-                    Text("Every Time")
-                case .valueChanged:
-                    Text("On Change")
-                case let .valueIsGreaterThan(value, orEquals):
-                    if orEquals {
-                        Text("Greater than or equals \(value.description)")
-                    } else {
-                        Text("Greater than \(value.description)")
-                    }
-                case let.valueIsLessThan(value, orEquals):
-                    if orEquals {
-                        Text("Less than or equals \(value.description)")
-                    } else {
-                        Text("Less than \(value.description)")
-                    }
-                }
             }
             VStack {
                 HStack {
-                    Text("Result Preview")
+                    Text("").frame(width: SelectorView.labelWidth)
+                    Toggle(isOn: $config.alertSound) {
+                        Text("Play Sound")
+                    }.disabled(config.alertType == .none)
                     Spacer()
+                }.padding(.bottom, 5)
+                HStack {
+                    Text("").frame(width: SelectorView.labelWidth)
+                    Toggle(isOn: $config.alertTimeSensitive) {
+                        Text("Time Sensitive")
+                    }.disabled(config.alertType == .none)
+                    Spacer()
+                }
+            }
+            VStack {
+                HStack(alignment: .top) {
+                    Text("Result Preview").frame(width: SelectorView.labelWidth, alignment: .trailing).font(.system(.body, weight: .semibold))
                     if lastError != nil {
                         Button(action: {  }) {
                             Image(nsImage: NSImage(systemSymbolName: "exclamationmark.circle", accessibilityDescription: "Error")!)
                         }
                     } else {
-                        Text(config.result?.description() ?? "")
+                        Text(config.lastValue?.formatted() ?? "").frame(alignment: .leading)
                     }
+                    Spacer()
                 }
                 HStack {
+                    Spacer()
                     Button("Open Browser") {
                         SelectorPreviewView(config: config)
                             .padding(.all)
-                            .environment(\.managedObjectContext, viewContext)
+                            .environment(\.realm, realm)
                             .openWindow(with: "Browser", level: .modalPanel, size: CGSize(width: 720, height: 480))
                     }
-                    Spacer()
                 }
             }
             Spacer()
@@ -174,17 +208,27 @@ struct SelectorView: View {
                     showingError = false
                 }
             }
-        }.sheet(isPresented: $showingAlertConfig, onDismiss: { saveConfig() }) {
-            AlertConfigView(config: config)
-                .environment(\.managedObjectContext, viewContext)
-                .padding(.all)
+        }
+    }
+    
+    private func isLessThan() -> Bool {
+        switch config.alertType {
+        case .valueIsLessThan(_, _): return true
+        default: return false
+        }
+    }
+    
+    private func isGreaterThan() -> Bool {
+        switch config.alertType {
+        case .valueIsGreaterThan(_, _): return true
+        default: return false
         }
     }
     
     func downloadUrl() async {
         if let url = config.url {
             var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20.0)
-            request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
+            request.setValue(safariUserAgent, forHTTPHeaderField: "User-agent")
             request.setValue("en", forHTTPHeaderField: "Accept-Language")
             request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
             do {
@@ -221,8 +265,8 @@ struct SelectorView: View {
     
     func onSelectorChange() {
         if isDownloaded {
-            if let selector = config.selector?.notBlank() {
-                let type = ResultType.from(tag: config.resultType) ?? .String
+            if let selector = config.selector.notBlank() {
+                let type = config.resultType
                 do {
                     lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: selector, resultIndex: Int(config.elementIndex), resultType: type)
                     lastError = nil
@@ -239,19 +283,10 @@ struct SelectorView: View {
             }
         }
     }
-    
-    func doSaveConfig() {
-        do {
-            try viewContext.save()
-        } catch {
-            logger.warning("error saving config: \(error)")
-        }
-        Scheduler.shared.scheduleConfigs()
-    }
 }
 
 struct SelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        SelectorView(config: Config())
+        SelectorView(config: ConfigV2(index: 0, name: "Test"))
     }
 }

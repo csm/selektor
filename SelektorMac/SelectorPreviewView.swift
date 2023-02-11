@@ -5,22 +5,23 @@
 //  Created by Casey Marshall on 1/14/23.
 //
 
+import RealmSwift
 import SwiftUI
 import WebKit
 
 struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
     @Environment(\.window) var window
-    @Environment(\.managedObjectContext) var viewContext
+    @Environment(\.realm) var realm
     
     var id: String {
-        get { config.id!.uuidString }
+        get { config.id.stringValue }
     }
-    @ObservedObject var config: Config
+    @ObservedRealmObject var config: ConfigV2
     @State var highlightedSelector: String? = nil
-    @State var highlightedIndex: Int32 = 0
+    @State var highlightedIndex: Int = 0
     @State var result: Result? = nil
     @State var selector: String = ""
-    @State var resultIndex: Int32 = 0
+    @State var resultIndex: Int = 0
     private let webView: WKWebView
     private let monitorClicksJs: String
     
@@ -38,7 +39,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
         return downloadDir.appendingPathComponent("selektor-preview.html")
     }()
     
-    init(config: Config) {
+    init(config: ConfigV2) {
         self.config = config
         let pagePreferences = WKWebpagePreferences()
         let preferences = WKPreferences()
@@ -65,9 +66,16 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
                     window?.close()
                 }
                 Button("OK") {
-                    config.selector = selector
-                    config.elementIndex = resultIndex
-                    try? viewContext.save()
+                    do {
+                        try realm.write {
+                            if let config = config.thaw() {
+                                config.selector = selector
+                                config.elementIndex = resultIndex
+                            }
+                        }
+                    } catch {
+                        logger.warning("could not save: \(error)")
+                    }
                     window?.close()
                 }
             }
@@ -76,11 +84,11 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
                 Text("Result Index")
                 TextField("Result Index", text: $resultIndex.oneBasedStringBinding())
             }
-            Text("Result Preview \(result?.description() ?? "")")
+            Text("Result Preview \(result?.formatted() ?? "")")
             Divider()
             WebView(webView: webView)
         }.onAppear {
-            self.selector = config.selector ?? ""
+            self.selector = config.selector
             self.resultIndex = config.elementIndex
             Task() {
                 await downloadUrl()
@@ -89,7 +97,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
             NavigationDelegateImpl.shared.registerListener(listener: self)
         }.onDisappear {
             ScriptMessageHandlerImpl.shared.unregisterHandler(handler: self)
-            NavigationDelegateImpl.shared.registerListener(listener: self)
+            NavigationDelegateImpl.shared.unregisterListener(listener: self)
         }
     }
     
@@ -113,7 +121,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
     func downloadUrl() async {
         if let url = config.url {
             var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30.0)
-            request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
+            request.setValue(safariUserAgent, forHTTPHeaderField: "User-agent")
             request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
             request.setValue("en", forHTTPHeaderField: "Accept-Language")
             do {
@@ -130,7 +138,7 @@ struct SelectorPreviewView: View, OnCommitHandler, OnScriptResultHandler {
         do {
             if let s = selector.notBlank() {
                 if let elementText = try await webView.evaluateJavaScript("document.querySelectorAll(\"\(s)\")[\(resultIndex)].innerHTML;") as? String {
-                    result = try? ValueSelector.decodeResult(text: elementText, resultType: ResultType.from(tag: config.resultType) ?? .String)
+                    result = try? ValueSelector.decodeResult(text: elementText, resultType: config.resultType)
                 }
             }
             await runHighlighter()
@@ -198,7 +206,7 @@ true;
             if let d = text.data(using: .utf8) {
                 let result = try decoder.decode(ElementSelectResult.self, from: d)
                 self.selector = result.selector
-                resultIndex = Int32(result.index)
+                resultIndex = Int(result.index)
                 Task() { await onSelectorChange() }
             } else {
                 logger.warning("couldn't encode \(text) as data")
@@ -211,6 +219,6 @@ true;
 
 struct SelectorPreviewView_Previews: PreviewProvider {
     static var previews: some View {
-        SelectorPreviewView(config: Config())
+        SelectorPreviewView(config: ConfigV2(index: 0, name: "Test Config"))
     }
 }

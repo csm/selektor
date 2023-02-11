@@ -8,7 +8,7 @@
 import WidgetKit
 import SwiftUI
 import Intents
-import CoreData
+import RealmSwift
 
 @main
 struct SelektorWidgets: WidgetBundle {
@@ -25,11 +25,9 @@ struct SelektorWidgets: WidgetBundle {
 }
 
 struct Provider: IntentTimelineProvider {
-    var managedObjectContext: NSManagedObjectContext
     let configIndex: Int
 
-    init(context: NSManagedObjectContext, configIndex: Int) {
-        self.managedObjectContext = context
+    init(configIndex: Int) {
         self.configIndex = configIndex
     }
     
@@ -62,15 +60,13 @@ struct Provider: IntentTimelineProvider {
     
     private func getEntry(_ context: Context, _ configuration: ConfigurationIntent) throws -> SimpleEntry {
         logger.notice("fetching entry...")
-        let request = NSFetchRequest<Config>(entityName: "Config")
-        request.predicate = NSPredicate(format: "isWidget == TRUE")
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \Config.index, ascending: true)]
-        let entries = try managedObjectContext.fetch(request)
+        let realm = try PersistenceV2.readOnly.realm
+        let entries = realm.objects(ConfigV2.self).where { c in c.isWidget }
         logger.notice("got entries \(entries) with isWidget == TRUE")
         if let config = entries.dropFirst(configIndex).first {
             return SimpleEntry(
                 date: config.lastFetch ?? Date(),
-                results: [ResultEntry(date: config.lastFetch ?? Date(), text: config.result?.description() ?? "--", label: config.name ?? "")],
+                results: [ResultEntry(date: config.lastFetch ?? Date(), text: config.lastValue?.formatted() ?? "--", label: config.name)],
                 configuration: configuration
             )
         }
@@ -79,18 +75,14 @@ struct Provider: IntentTimelineProvider {
     
     private func getEntries(_ context: Context, _ configuration: ConfigurationIntent) throws -> [SimpleEntry] {
         logger.notice("fetching entries...")
-        let configRequest = NSFetchRequest<Config>(entityName: "Config")
-        configRequest.predicate = NSPredicate(format: "isWidget == TRUE")
-        configRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Config.index, ascending: true)]
-        let entries = try managedObjectContext.fetch(configRequest)
-        if let config = entries.dropFirst(configIndex).first, let id = config.id {
-            let request = NSFetchRequest<History>(entityName: "History")
-            request.predicate = NSPredicate(format: "configId == %@", argumentArray: [id])
-            request.sortDescriptors = [NSSortDescriptor(keyPath: \History.date, ascending: false)]
-            let history = try managedObjectContext.fetch(request)
+        let realm = try PersistenceV2.readOnly.realm
+        let entries = realm.objects(ConfigV2.self).where { c in c.isWidget }.sorted(by: { (a, b) in a.index < b.index })
+        if let config = entries.dropFirst(configIndex).first {
+            let id = config.id
+            let history = realm.objects(HistoryV2.self).where { h in h.configId == id }.sorted(by: { (a, b) in a.date < b.date })
             var results: [SimpleEntry] = []
             history.forEach { entry in
-                results.append(SimpleEntry(date: entry.date!, results: [ResultEntry(date: entry.date!, text: entry.result?.description() ?? "", label: config.name ?? "Selektor")], configuration: configuration))
+                results.append(SimpleEntry(date: entry.date, results: [ResultEntry(date: entry.date, text: entry.result?.formatted() ?? "", label: config.name)], configuration: configuration))
             }
             return results
         }
@@ -175,7 +167,7 @@ struct SelektorWidget: Widget {
     }
     
     var body: some WidgetConfiguration {
-        IntentConfiguration(kind: kind, intent: ConfigurationIntent.self, provider: Provider(context: PersistenceController.shared.container.viewContext, configIndex: configIndex)) { entry in
+        IntentConfiguration(kind: kind, intent: ConfigurationIntent.self, provider: Provider(configIndex: configIndex)) { entry in
             SelektorWidgetsEntryView(entry: entry)
         }
         .configurationDisplayName("Selektor")

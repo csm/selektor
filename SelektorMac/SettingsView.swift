@@ -5,16 +5,34 @@
 //  Created by Casey Marshall on 1/3/23.
 //
 
+import RealmSwift
 import SwiftUI
 
 struct SettingsView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.realm) private var realm
     
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Config.index, ascending: true)],
-        animation: .default)
-    private var configs: FetchedResults<Config>
-    @State var selectedConfig: Config.ID? = nil
+    @ObservedResults(ConfigV2.self, sortDescriptor: SortDescriptor(keyPath: \ConfigV2.index, ascending: true)) var configs
+    @State var selectedConfig: ConfigV2.ID? = nil
+    
+    var selectedConfigObject: ConfigV2? {
+        get {
+            return configs.first(where: {c in c.id == selectedConfig })
+        }
+    }
+    
+    var selectedConfigIsFirst: Bool {
+        get {
+            let minIndex = configs.map({c in c.index}).min() ?? 0
+            return selectedConfig != nil && configs.first(where: {c in c.id == selectedConfig})?.index == minIndex
+        }
+    }
+    
+    var selectedConfigIsLast: Bool {
+        get {
+            let maxIndex = configs.map({c in c.index}).max() ?? 0
+            return selectedConfig != nil && configs.first(where: {c in c.id == selectedConfig})?.index == maxIndex
+        }
+    }
     
     var body: some View {
         NavigationSplitView {
@@ -27,6 +45,19 @@ struct SettingsView: View {
                     Button(action: addConfig) {
                         Image(nsImage: NSImage(systemSymbolName: "plus", accessibilityDescription: "Add")!)
                     }
+                    Button(action: moveConfigUp) {
+                        Image(nsImage: NSImage(systemSymbolName: "chevron.up", accessibilityDescription: "Move Up")!)
+                    }.disabled(
+                        selectedConfig == nil || selectedConfigIsFirst
+                    )
+                    Button(action: moveConfigDown) {
+                        Image(nsImage: NSImage(systemSymbolName: "chevron.down", accessibilityDescription: "Move Down")!)
+                    }.disabled(
+                        selectedConfig == nil || selectedConfigIsLast
+                    )
+                    Button(action: deleteConfig) {
+                        Image(nsImage: NSImage(systemSymbolName: "trash", accessibilityDescription: "Delete")!)
+                    }.disabled(selectedConfig == nil)
                     Spacer()
                 }.padding(.all)
             }
@@ -68,33 +99,86 @@ struct SettingsView: View {
     }
     
     func addConfig() {
-        var configs: [Config] = []
-        for c in self.configs {
-            configs.append(c)
-        }
-        let config = Config(context: viewContext)
-        config.id = UUID()
-        config.index = (configs.map { c in c.index }.max()?.inc() ?? 0)
-        config.resultType = ResultType.String.tag()
-        var name = "New Config"
-        var i = 0
-        while (configs.first(where: { c in c.name == name }) != nil) {
-            i += 1
-            name = "New Config \(i)"
-        }
-        config.name = name
-        config.triggerInterval = 1
-        config.triggerIntervalUnits = TimeUnit.Hours.tag()
         do {
-            try viewContext.save()
+            try realm.write {
+                let nextIndex = (configs.map { c in c.index }.max()?.inc() ?? 0)
+                var name = "New Config"
+                var i = 1
+                while (configs.first(where: { c in c.name == name }) != nil) {
+                    i += 1
+                    name = "New Config \(i)"
+                }
+                let config = ConfigV2(index: nextIndex, name: name)
+                config.triggerInterval = TimeDuration(value: 1, units: .Days)
+                realm.add(config)
+                selectedConfig = config.id
+            }
         } catch {
             logger.error("error saving: \(error)")
+        }
+    }
+    
+    func moveConfigUp() {
+        do {
+            if let currentConfig = configs.first(where: {c in c.id == selectedConfig}) {
+                if let prevConfig = configs.filter({c in c.index < currentConfig.index}).max(by: {(a, b) in a.index < b.index}) {
+                    do {
+                        try realm.write {
+                            let t = prevConfig.index
+                            prevConfig.index = currentConfig.index
+                            currentConfig.index = t
+                        }
+                    } catch {
+                        logger.error("could not save configs: \(error)")
+                    }
+                } else {
+                    logger.debug("no prev config")
+                }
+            } else {
+                logger.debug("no current config \(selectedConfig)")
+            }
+        } catch {
+            logger.error("could not save moving up: \(error)")
+        }
+    }
+    
+    func moveConfigDown() {
+        do {
+            if let currentConfig = configs.first(where: {c in c.id == selectedConfig}) {
+                if let nextConfig = configs.filter({c in c.index > currentConfig.index}).min(by: {(a, b) in a.index < b.index}) {
+                    do {
+                        try realm.write {
+                            let t = nextConfig.index
+                            nextConfig.index = currentConfig.index
+                            currentConfig.index = t
+                        }
+                    } catch {
+                        logger.error("could not save configs: \(error)")
+                    }
+                } else {
+                    logger.debug("no next config")
+                }
+            } else {
+                logger.debug("no current config \(selectedConfig)")
+            }
+        } catch {
+            logger.error("could not save moving down: \(error)")
+        }
+    }
+    
+    func deleteConfig() {
+        if let currentConfig = realm.object(ofType: ConfigV2.self, forPrimaryKey: selectedConfig) {
+            do {
+                try PersistenceV2.shared.deleteConfig(realm: realm, config: currentConfig)
+            } catch {
+                logger.error("could not delete config: \(error)")
+            }
         }
     }
 }
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        SettingsView().environment(\.realm, try! PersistenceV2.preview.realm)
     }
 }

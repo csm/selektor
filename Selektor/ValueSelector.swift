@@ -47,7 +47,7 @@ class ValueSelector {
     func fetchValue(url: URL, selector: String, resultIndex: Int, resultType: ResultType, onComplete: @escaping (Result?, Error?) -> Void) {
         logger.info("fetching \(url) with selector \(selector) resultIndex: \(resultIndex) resultType: \(resultType.rawValue)")
         var request = URLRequest(url: url, timeoutInterval: 20.0)
-        request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
+        request.setValue(safariUserAgent, forHTTPHeaderField: "User-agent")
         request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
         request.setValue("en", forHTTPHeaderField: "Accept-Language")
         let task = session.downloadTask(with: request) { location, response, error in
@@ -60,7 +60,7 @@ class ValueSelector {
                     do {
                         logger.notice("read data into URL: \(u)")
                         let result = try ValueSelector.applySelector(location: u, selector: selector, resultIndex: resultIndex, resultType: resultType)
-                        logger.notice("decoded \(result?.description() ?? "nil")")
+                        logger.notice("decoded \(result?.formatted() ?? "nil")")
                         onComplete(result, nil)
                     } catch {
                         logger.error("error decoding \(error)")

@@ -9,6 +9,7 @@ import CoreData
 
 struct PersistenceController {
     static let shared = PersistenceController()
+    static let readOnly = PersistenceController(readOnly: true)
 
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
@@ -32,13 +33,15 @@ struct PersistenceController {
 
     let container: NSPersistentContainer
 
-    init(inMemory: Bool = false) {
+    init(inMemory: Bool = false, readOnly: Bool = false) {
         container = NSPersistentContainer(name: "Selektor")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         } else {
             let storeUrl = AppGroup.main.containerUrl.appending(component: "main.sqlite")
             let description = NSPersistentStoreDescription(url: storeUrl)
+            description.shouldMigrateStoreAutomatically = true
+            description.isReadOnly = readOnly
             container.persistentStoreDescriptions = [description]
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in

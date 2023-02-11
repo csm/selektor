@@ -17,7 +17,7 @@ struct SubscribeView: View {
     init() {
         self.subscriptionManager = SubscriptionManager.shared
         self.dateFormatter = DateFormatter()
-        self.dateFormatter.dateStyle = .short
+        self.dateFormatter.dateStyle = .long
     }
     
     var body: some View {
@@ -26,10 +26,10 @@ struct SubscribeView: View {
             
             case .subscribed(let until):
                 VStack {
-                    Text("You're subscribed!")
+                    Text("You're subscribed! 🎉").font(.title)
                     Spacer()
                     if let until = until {
-                        Text("You have full access to Selektor until \(dateFormatter.string(from: until)).").lineLimit(nil)
+                        Text("You have full access to Selektor until \(dateFormatter.string(from: until)).").lineLimit(nil).multilineTextAlignment(.center)
                     } else {
                         Text("You have full access to Selektor.").lineLimit(nil)
                     }

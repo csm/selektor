@@ -7,7 +7,7 @@
 
 import Foundation
 import UserNotifications
-import CoreData
+import RealmSwift
 
 enum PushError: Error {
     case InternalError
@@ -62,11 +62,10 @@ class PushManager {
     
     func updateSchedules() async throws {
         if let creds = try CredentialsManager.shared.credentials {
-            let viewContext = PersistenceController.shared.container.viewContext
-            let request = NSFetchRequest<Config>(entityName: "Config")
-            let results = try viewContext.fetch(request)
-            let schedules = results.map { config in
-                let fireInterval = config.fireIntervalDuration
+            let realm = try PersistenceV2.shared.realm
+            let results = realm.objects(ConfigV2.self)
+            let schedules = Array(results.map { config in
+                let fireInterval = config.triggerInterval.toDuration()
                 let fireIntervalSeconds = fireInterval.components.seconds
                 let lastFetchSeconds: Int64
                 if let s = config.lastFetch?.timeIntervalSince1970 {
@@ -75,7 +74,7 @@ class PushManager {
                     lastFetchSeconds = fireIntervalSeconds
                 }
                 return ScheduleEntry(last_fire: lastFetchSeconds / 300, fire_interval: fireIntervalSeconds / 300)
-            }
+            })
             let requestObj = UpdateSchedRequest(entries: schedules)
             if let url = URL(string: "https://\(SERVER)/api/update_sched") {
                 var request = URLRequest(url: url)

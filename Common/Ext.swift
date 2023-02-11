@@ -35,3 +35,7 @@ extension Int32 {
         self + 1
     }
 }
+
+extension Int {
+    func inc() -> Int { self + 1 }
+}

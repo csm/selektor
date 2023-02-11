@@ -6,8 +6,11 @@
 //
 
 import Foundation
+import RealmSwift
 
-enum AlertType {
+enum AlertType: FailableCustomPersistable {
+    typealias PersistedType = Data
+    
     case none
     case everyTime
     case valueChanged
@@ -37,6 +40,56 @@ enum AlertType {
             return AlertType.valueChanged
         } else {
             return AlertType.none
+        }
+    }
+    
+    init?(persistedValue: Data) {
+        do {
+            let obj = try JSONDecoder().decode([String].self, from: persistedValue)
+            if obj.count > 0 {
+                let tag = obj[0]
+                if tag == "n" {
+                    self = .none
+                    return
+                } else if tag == "e" {
+                    self = .everyTime
+                    return
+                } else if tag == "c" {
+                    self = .valueChanged
+                    return
+                } else if tag == "<" {
+                    if obj.count == 3 {
+                        if let compareValue = Decimal(string: obj[1]) {
+                            self = .valueIsLessThan(value: compareValue, orEquals: obj[2] == "true")
+                            return
+                        }
+                    }
+                } else if tag == ">" {
+                    if obj.count == 3 {
+                        if let compareValue = Decimal(string: obj[1]) {
+                            self = .valueIsGreaterThan(value: compareValue, orEquals: obj[2] == "true")
+                            return
+                        }
+                    }
+                }
+            }
+        } catch {
+        }
+        return nil
+    }
+    
+    var persistableValue: Data {
+        get {
+            let obj: [String]
+            switch self {
+            case .none, .everyTime, .valueChanged:
+                obj = [self.tag]
+            case .valueIsGreaterThan(value: let value, orEquals: let orEquals):
+                obj = [self.tag, value.formatted(), "\(orEquals)"]
+            case .valueIsLessThan(value: let value, orEquals: let orEquals):
+                obj = [self.tag, value.formatted(), "\(orEquals)"]
+            }
+            return try! JSONEncoder().encode(obj)
         }
     }
 }

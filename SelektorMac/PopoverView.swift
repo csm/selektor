@@ -54,7 +54,7 @@ struct PopoverView: View {
                     HStack(alignment: .top) {
                         Text(config.name ?? "New Config")
                         Spacer()
-                        Text(config.result?.description() ?? "")
+                        Text(config.lastValue?.formatted() ?? "")
                             .lineLimit(nil)
                             .multilineTextAlignment(.trailing)
                             .foregroundColor(.gray)
@@ -62,7 +62,7 @@ struct PopoverView: View {
                 }.padding(.bottom, 4)
                     .background(configBackgroundColor(config))
                     .onTapGesture {
-                        HistoryView(id: config.id!, name: config.name!).environment(\.managedObjectContext, viewContext).openWindow(size: CGSize(width: 480, height: 640))
+                        HistoryView(id: config.id, name: config.name!).environment(\.managedObjectContext, viewContext).openWindow(size: CGSize(width: 480, height: 640))
                     }.onHover { hover in
                         if hover {
                             hoveredElement = .config(config: config)

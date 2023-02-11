@@ -75,7 +75,7 @@ class SubscriptionManager: ObservableObject {
     }
     
     private func handleVerificationResult(_ verificationResult: VerificationResult<Transaction>) async {
-        logger.debug("verification result: \(verificationResult) -- \(verificationResult.jwsRepresentation)")
+        //logger.debug("verification result: \(verificationResult) -- \(verificationResult.jwsRepresentation)")
         switch verificationResult {
         case .unverified(_, _):
             logger.info("ignoring unverified transaction")
@@ -90,9 +90,23 @@ class SubscriptionManager: ObservableObject {
                     await update(subscriptionState: .notSubscribed)
                 } else {
                     await update(subscriptionState: .subscribed(until: expirationDate))
+#if os(iOS)
+                    do {
+                        try await CredentialsManager.shared.exchangeCredentials()
+                    } catch {
+                        logger.error("error exchanging credentials: \(error)")
+                    }
+#endif
                 }
             } else {
                 await update(subscriptionState: .subscribed(until: nil))
+#if os(iOS)
+                do {
+                    try await CredentialsManager.shared.exchangeCredentials()
+                } catch {
+                    logger.error("error exchanging credentials: \(error)")
+                }
+#endif
             }
         }
     }

@@ -6,14 +6,19 @@
 //
 
 import SwiftUI
-import CoreData
+import RealmSwift
 import WebKit
+
+enum NavDest: Int {
+    case alertConfig = 0
+    case history = 1
+}
 
 struct SelectorView: View {
     @Environment(\.presentationMode) private var presentationMode
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.realm) private var realm
     
-    @ObservedObject var config: Config
+    @ObservedRealmObject var config: ConfigV2
     
     @State var highlightedSelectors: String? = nil
     @State var lastResult: Result? = Result.StringResult(string: "")
@@ -60,7 +65,10 @@ struct SelectorView: View {
                 }
             }
             Group {
-                NavigationLink(destination: HistoryView(id: config.id!, name: config.name!)) {
+                NavigationLink(
+                    destination: HistoryView(id: config.id, name: config.name)
+                        .environment(\.realm, try! PersistenceV2.shared.realm)
+                ) {
                     Text("Result History").font(largeLabelFont)
                 }
                 Button(action: { showPreview = true }) {
@@ -91,11 +99,6 @@ struct SelectorView: View {
             }
         }
         .onDisappear {
-            do {
-                try viewContext.save()
-            } catch {
-                logger.error("failed to save! \(error)")
-            }
             Task() {
                 do {
                     try await PushManager.shared.updateSchedules()
@@ -122,7 +125,7 @@ struct SelectorView: View {
     
     var configControls: some View {
         Group {
-            TextField("Name", text: ($config.name).safeBinding(defaultValue: ""))
+            TextField("Name", text: $config.name)
                 .textInputAutocapitalization(.words)
             VStack(alignment: .leading) {
                 Text("URL").font(smallLabelFont)
@@ -142,7 +145,7 @@ struct SelectorView: View {
             VStack(alignment: .leading) {
                 HStack {
                     Text("Refresh").font(largeLabelFont)
-                    Picker("", selection: ($config.triggerIntervalUnits).timeUnitBinding()) {
+                    Picker("", selection: ($config.triggerInterval).unitsBinding()) {
                         Text("Hourly").tag(TimeUnit.Hours)
                         Text("Daily").tag(TimeUnit.Days)
                     }.disabled(!subscriptionManager.isSubscribed)
@@ -154,7 +157,7 @@ struct SelectorView: View {
             }
             VStack(alignment: .leading) {
                 Text("Selector").font(largeLabelFont)
-                MultilineTextField(placeholder: "Selector", text: ($config.selector).safeBinding(defaultValue: ""), onCommit: {
+                MultilineTextField(placeholder: "Selector", text: $config.selector, onCommit: {
                     Task(priority: .background) {
                         await self.onChange()
                     }
@@ -180,7 +183,7 @@ struct SelectorView: View {
             HStack {
                 Text("Decode As").font(largeLabelFont)
                 Spacer()
-                Picker("", selection: ($config.resultType).resultTypeBinding()) {
+                Picker("", selection: $config.resultType) {
                     Text("Text").tag(ResultType.String)
                     Text("Number").tag(ResultType.Float)
                     Text("Percent").tag(ResultType.Percent)
@@ -202,7 +205,10 @@ struct SelectorView: View {
                 }
             if subscriptionManager.isSubscribed {
                 HStack {
-                    NavigationLink(destination: AlertConfigView(config: config)) {
+                    NavigationLink(
+                        destination: AlertConfigView(id: config.id)
+                            .environment(\.realm, try! PersistenceV2.shared.realm)
+                    ) {
                         HStack {
                             Text("Alerts").font(largeLabelFont)
                             Spacer()
@@ -243,9 +249,9 @@ struct SelectorView: View {
     }
     
     func onUrlChange() async {
-        if let u = config.url, let s = config.selector?.notBlank() {
+        if let u = config.url, let s = config.selector.notBlank() {
             var request = URLRequest(url: u, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20.0)
-            request.setValue(lynxUserAgent, forHTTPHeaderField: "User-agent")
+            request.setValue(safariUserAgent, forHTTPHeaderField: "User-agent")
             request.setValue("en", forHTTPHeaderField: "Accept-Language")
             request.setValue("text/html, text/plain, text/sgml, text/css, application/xhtml+xml, */*;q=0.01", forHTTPHeaderField: "Accept")
             do {
@@ -261,10 +267,10 @@ struct SelectorView: View {
                         }
                         try FileManager.default.copyItem(at: data, to: SelectorView.downloadPath)
                         lastEncoding = DownloadManager.stringEncoding(response: response)
-                        lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: Int(config.elementIndex), resultType: config.resultTypeValue, documentEncoding: DownloadManager.stringEncoding(response: response))
+                        lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: Int(config.elementIndex), resultType: config.resultType, documentEncoding: DownloadManager.stringEncoding(response: response))
                         lastError = nil
                         errorText = ""
-                        resultPreview = lastResult?.description() ?? ""
+                        resultPreview = lastResult?.formatted() ?? ""
                     default:
                         isDownloaded = true
                         lastError = ValueSelectorError.HTTPError(statusCode: r.statusCode)
@@ -296,21 +302,16 @@ struct SelectorView: View {
     
     func onChange() async {
         do {
-            try viewContext.save()
-        } catch {
-            logger.error("could not save managed values: \(error)")
-        }
-        do {
             try await PushManager.shared.updateSchedules()
         } catch {
             logger.error("could not upload schedules: \(error)")
         }
         if isDownloaded {
-            if let s = config.selector?.notBlank() {
+            if let s = config.selector.notBlank() {
                 do {
-                    lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: Int(config.elementIndex), resultType: config.resultTypeValue, documentEncoding: lastEncoding)
+                    lastResult = try ValueSelector.applySelector(location: SelectorView.downloadPath, selector: s, resultIndex: Int(config.elementIndex), resultType: config.resultType, documentEncoding: lastEncoding)
                     lastError = nil
-                    resultPreview = lastResult?.description() ?? ""
+                    resultPreview = lastResult?.formatted() ?? ""
                 } catch {
                     lastResult = nil
                     lastError = error
@@ -335,13 +336,6 @@ struct SelectorView: View {
 
 struct SelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        SelectorView(config: createConfig()).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-    }
-    
-    static func createConfig() -> Config {
-        let config = Config(context: PersistenceController.preview.container.viewContext)
-        config.name = "Config"
-        config.index = 1
-        return config
+        SelectorView(config: ConfigV2(index: 0, name: "Test Config")).environment(\.realm, try! PersistenceV2.preview.realm)
     }
 }

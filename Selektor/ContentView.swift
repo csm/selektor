@@ -6,26 +6,29 @@
 //
 
 import SwiftUI
-import CoreData
+import RealmSwift
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.realm) private var realm
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Config.index, ascending: true)],
-        animation: .default)
-    private var configs: FetchedResults<Config>
+    @ObservedResults(ConfigV2.self, sortDescriptor: SortDescriptor(keyPath: \ConfigV2.index, ascending: true))
+    private var configs
+    @State var selectedConfig: ConfigV2.ID? = nil
+    
     @State var showSubscriptionView: Bool = false
 
     var body: some View {
         NavigationStack {
             List {
                 ForEach(configs) { config in
-                    NavigationLink(destination: SelectorView(config: config)) {
-                        HStack {
-                            Text(config.name ?? "")
+                    NavigationLink(
+                        destination: SelectorView(config: config)
+                            .environment(\.realm, try! PersistenceV2.shared.realm)
+                    ) {
+                        HStack(alignment: .top) {
+                            Text(config.name)
                             Spacer()
-                            Text(config.result?.description() ?? "").foregroundColor(.gray)
+                            Text(config.lastValue?.formatted() ?? "").foregroundColor(.gray)
                         }
                     }
                 }
@@ -60,58 +63,33 @@ struct ContentView: View {
     }
 
     private func addItem() {
-        let newItem = Config(context: viewContext)
-        newItem.index = (configs.map(\.index).max() ?? -1) + 1
-        newItem.name = "New Config"
-        newItem.id = UUID()
-        newItem.triggerInterval = 1
-        newItem.triggerIntervalUnits = TimeUnit.Hours.tag()
-        newItem.resultTypeValue = .String
-        var i = 1
-        while configs.first(where: { c in c.name == newItem.name }) != nil {
-            i += 1
-            newItem.name = "New Config \(i)"
+        do {
+            try realm.write {
+                let nextIndex = (configs.map { c in c.index }.max()?.inc() ?? 0)
+                var name = "New Config"
+                var i = 1
+                while configs.first(where: { c in c.name == name }) != nil {
+                    i += 1
+                    name = "New Config \(i)"
+                }
+                let newItem = ConfigV2(index: nextIndex, name: name)
+                newItem.triggerInterval = TimeDuration(value: 1, units: .Days)
+                realm.add(newItem)
+                selectedConfig = newItem.id
+            }
+        } catch {
+            logger.error("failed to add config \(error)")
         }
-
-            /*do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }*/
     }
     
     private func moveItems(_ from: IndexSet, _ to: Int) {
-        let fromIndex = from.first!
-        configs.forEach { config in
-            if (config.index == fromIndex) {
-                config.index = Int32(to)
-            } else if (config.index >= to) {
-                config.index += 1
-            }
-        }
-        do {
-            try viewContext.save()
-        } catch {
-            logger.error("error saving \(error)")
-        }
+        logger.debug("moveItems from: \(from) to: \(to)")
     }
 
     private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { configs[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+        logger.debug("deleteItems offsets: \(offsets)")
+        /*withAnimation {
+        }*/
     }
 }
 

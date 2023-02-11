@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		7018497C29668F7700EFC53D /* ConfigView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7018497B29668F7700EFC53D /* ConfigView.xib */; };
 		7018497E29668FBE00EFC53D /* MenuHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7018497D29668FBE00EFC53D /* MenuHostingView.swift */; };
-		70184980296690A100EFC53D /* ConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7018497F296690A100EFC53D /* ConfigView.swift */; };
 		701849822966A04900EFC53D /* WordWrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701849812966A04900EFC53D /* WordWrap.swift */; };
 		701849832966A07C00EFC53D /* WordWrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701849812966A04900EFC53D /* WordWrap.swift */; };
 		701849852967DB0F00EFC53D /* ConfigListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701849842967DB0F00EFC53D /* ConfigListViewController.swift */; };
@@ -43,6 +42,20 @@
 		702A7FFE2963FD6200DAD0C7 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 702A7FFD2963FD6200DAD0C7 /* UserNotifications.framework */; };
 		7061C914298CA5910031CCEE /* PushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7061C913298CA5910031CCEE /* PushManager.swift */; };
 		7061C916298E1DBF0031CCEE /* NotificationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7061C915298E1DBE0031CCEE /* NotificationDelegate.swift */; };
+		7061C9192992D87E0031CCEE /* PersistenceV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7061C9182992D87E0031CCEE /* PersistenceV2.swift */; };
+		7061C91A2992D87E0031CCEE /* PersistenceV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7061C9182992D87E0031CCEE /* PersistenceV2.swift */; };
+		7061C91B2992D87E0031CCEE /* PersistenceV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7061C9182992D87E0031CCEE /* PersistenceV2.swift */; };
+		7061C91E2992E1400031CCEE /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7061C91D2992E1400031CCEE /* RealmSwift */; };
+		7061C9202992E70A0031CCEE /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7061C91F2992E70A0031CCEE /* RealmSwift */; };
+		7061C9222992E7180031CCEE /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 7061C9212992E7180031CCEE /* Realm */; };
+		7061C9242994B7860031CCEE /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 7061C9232994B7860031CCEE /* Realm */; };
+		7061C9262994B7860031CCEE /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7061C9252994B7860031CCEE /* RealmSwift */; };
+		7061C9292995C8C60031CCEE /* Erik in Frameworks */ = {isa = PBXBuildFile; productRef = 7061C9282995C8C60031CCEE /* Erik */; };
+		7061C92B2995C9640031CCEE /* Erik in Frameworks */ = {isa = PBXBuildFile; productRef = 7061C92A2995C9640031CCEE /* Erik */; };
+		7061C92D2995CC250031CCEE /* ErikValueSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7061C92C2995CC250031CCEE /* ErikValueSelector.swift */; };
+		7061C92F2995F1280031CCEE /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 7061C92E2995F1280031CCEE /* Realm */; };
+		7061C9312995F1280031CCEE /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7061C9302995F1280031CCEE /* RealmSwift */; };
+		7061C934299740690031CCEE /* PersistenceV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7061C9182992D87E0031CCEE /* PersistenceV2.swift */; };
 		7068075D295666860013AE63 /* Divider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7068075C295666860013AE63 /* Divider.swift */; };
 		70680763295D0F320013AE63 /* SwiftMsgpackCsm in Frameworks */ = {isa = PBXBuildFile; productRef = 70680762295D0F320013AE63 /* SwiftMsgpackCsm */; };
 		70680765295D10310013AE63 /* SwiftMsgpackCsm in Frameworks */ = {isa = PBXBuildFile; productRef = 70680764295D10310013AE63 /* SwiftMsgpackCsm */; };
@@ -73,7 +86,6 @@
 		706807B82963F1800013AE63 /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F01293E7D9000F2B2B3 /* Scheduler.swift */; };
 		706807B92963F1860013AE63 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F03293EA72800F2B2B3 /* HistoryView.swift */; };
 		706807BA2963F1890013AE63 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F072940050B00F2B2B3 /* DownloadManager.swift */; };
-		706807BB2963F1960013AE63 /* AlertConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F092941618600F2B2B3 /* AlertConfigView.swift */; };
 		706807BC2963F19B0013AE63 /* LogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F1D294BAB6F00F2B2B3 /* LogsView.swift */; };
 		706807BE2963F1A40013AE63 /* elementPath.js in Resources */ = {isa = PBXBuildFile; fileRef = 70E20F5F2953D3A100F2B2B3 /* elementPath.js */; };
 		706807C02963F1B10013AE63 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F652954EA0C00F2B2B3 /* SubscriptionManager.swift */; };
@@ -157,7 +169,6 @@
 		70E20F662954EA0C00F2B2B3 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E20F652954EA0C00F2B2B3 /* SubscriptionManager.swift */; };
 		70E9F56C29641754007E170D /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E9F56B29641754007E170D /* MainView.swift */; };
 		70E9F56E2964AF40007E170D /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70E9F56D2964AF40007E170D /* ServiceManagement.framework */; };
-		70E9F5702964B21B007E170D /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E9F56F2964B21B007E170D /* PopoverView.swift */; };
 		70E9F5722964B35D007E170D /* ViewExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E9F5712964B35D007E170D /* ViewExt.swift */; };
 		70E9F5742964B455007E170D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E9F5732964B455007E170D /* SettingsView.swift */; };
 		70E9F59829650104007E170D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 70E9F59A29650104007E170D /* Main.storyboard */; };
@@ -280,6 +291,10 @@
 		702A7FFD2963FD6200DAD0C7 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk/System/Library/Frameworks/UserNotifications.framework; sourceTree = DEVELOPER_DIR; };
 		7061C913298CA5910031CCEE /* PushManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushManager.swift; sourceTree = "<group>"; };
 		7061C915298E1DBE0031CCEE /* NotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDelegate.swift; sourceTree = "<group>"; };
+		7061C917298F05D00031CCEE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7061C9182992D87E0031CCEE /* PersistenceV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceV2.swift; sourceTree = "<group>"; };
+		7061C92C2995CC250031CCEE /* ErikValueSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErikValueSelector.swift; sourceTree = "<group>"; };
+		7061C9322996ED4B0031CCEE /* OSUnfairLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSUnfairLock.swift; sourceTree = "<group>"; };
 		7068075C295666860013AE63 /* Divider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Divider.swift; sourceTree = "<group>"; };
 		70680769295E25AD0013AE63 /* HTMLCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLCleaner.swift; sourceTree = "<group>"; };
 		706807712963E7F80013AE63 /* SelektorMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SelektorMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -383,6 +398,8 @@
 			files = (
 				701849B62974C71200EFC53D /* SwiftMsgpackCsm in Frameworks */,
 				701849982974C41900EFC53D /* SwiftUI.framework in Frameworks */,
+				7061C9242994B7860031CCEE /* Realm in Frameworks */,
+				7061C9262994B7860031CCEE /* RealmSwift in Frameworks */,
 				701849972974C41900EFC53D /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -391,9 +408,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7061C9222992E7180031CCEE /* Realm in Frameworks */,
 				70E9F56E2964AF40007E170D /* ServiceManagement.framework in Frameworks */,
+				7061C92B2995C9640031CCEE /* Erik in Frameworks */,
 				702A7FFE2963FD6200DAD0C7 /* UserNotifications.framework in Frameworks */,
 				706807AE2963EAD90013AE63 /* SwiftMsgpackCsm in Frameworks */,
+				7061C9202992E70A0031CCEE /* RealmSwift in Frameworks */,
 				706807B02963EAD90013AE63 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -416,7 +436,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7061C91E2992E1400031CCEE /* RealmSwift in Frameworks */,
 				70E20F172946527F00F2B2B3 /* OSLog.framework in Frameworks */,
+				7061C9292995C8C60031CCEE /* Erik in Frameworks */,
 				70E20EBD2937EA9A00F2B2B3 /* WebKit.framework in Frameworks */,
 				70C18E682936865A009C09D0 /* BackgroundTasks.framework in Frameworks */,
 				70680763295D0F320013AE63 /* SwiftMsgpackCsm in Frameworks */,
@@ -455,6 +477,8 @@
 			files = (
 				70680765295D10310013AE63 /* SwiftMsgpackCsm in Frameworks */,
 				70E20EE6293A940200F2B2B3 /* SwiftUI.framework in Frameworks */,
+				7061C92F2995F1280031CCEE /* Realm in Frameworks */,
+				7061C9312995F1280031CCEE /* RealmSwift in Frameworks */,
 				70E20EE5293A940200F2B2B3 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -498,6 +522,7 @@
 		706807722963E7F80013AE63 /* SelektorMac */ = {
 			isa = PBXGroup;
 			children = (
+				7061C917298F05D00031CCEE /* Info.plist */,
 				706807732963E7F80013AE63 /* SelektorMacApp.swift */,
 				706807772963E7FA0013AE63 /* Assets.xcassets */,
 				706807812963E7FA0013AE63 /* SelektorMac.entitlements */,
@@ -706,6 +731,9 @@
 				70C18E772936C770009C09D0 /* Ext.swift */,
 				70D187DE297F5E8F003A210F /* Selektor.storekit */,
 				70D187E1297F8D0D003A210F /* StoreKitTestCertificate.cer */,
+				7061C9182992D87E0031CCEE /* PersistenceV2.swift */,
+				7061C92C2995CC250031CCEE /* ErikValueSelector.swift */,
+				7061C9322996ED4B0031CCEE /* OSUnfairLock.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -764,6 +792,8 @@
 			name = SelektorMacWidgetsExtension;
 			packageProductDependencies = (
 				701849B52974C71200EFC53D /* SwiftMsgpackCsm */,
+				7061C9232994B7860031CCEE /* Realm */,
+				7061C9252994B7860031CCEE /* RealmSwift */,
 			);
 			productName = SelektorMacWidgetsExtension;
 			productReference = 701849962974C41900EFC53D /* SelektorMacWidgetsExtension.appex */;
@@ -787,6 +817,9 @@
 			packageProductDependencies = (
 				706807AD2963EAD90013AE63 /* SwiftMsgpackCsm */,
 				706807AF2963EAD90013AE63 /* SwiftSoup */,
+				7061C91F2992E70A0031CCEE /* RealmSwift */,
+				7061C9212992E7180031CCEE /* Realm */,
+				7061C92A2995C9640031CCEE /* Erik */,
 			);
 			productName = SelektorMac;
 			productReference = 706807712963E7F80013AE63 /* SelektorMac.app */;
@@ -847,6 +880,8 @@
 			packageProductDependencies = (
 				70680762295D0F320013AE63 /* SwiftMsgpackCsm */,
 				70680767295E254A0013AE63 /* SwiftSoup */,
+				7061C91D2992E1400031CCEE /* RealmSwift */,
+				7061C9282995C8C60031CCEE /* Erik */,
 			);
 			productName = Selektor;
 			productReference = 70C18E1C293678E9009C09D0 /* Selektor.app */;
@@ -923,6 +958,8 @@
 			name = SelektorWidgetsExtension;
 			packageProductDependencies = (
 				70680764295D10310013AE63 /* SwiftMsgpackCsm */,
+				7061C92E2995F1280031CCEE /* Realm */,
+				7061C9302995F1280031CCEE /* RealmSwift */,
 			);
 			productName = SelektorWidgetsExtension;
 			productReference = 70E20EE4293A940200F2B2B3 /* SelektorWidgetsExtension.appex */;
@@ -1047,6 +1084,8 @@
 			packageReferences = (
 				70680761295D0F320013AE63 /* XCRemoteSwiftPackageReference "swift-msgpack" */,
 				70680766295E254A0013AE63 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				7061C91C2992E1400031CCEE /* XCRemoteSwiftPackageReference "realm-swift" */,
+				7061C9272995C8C50031CCEE /* XCRemoteSwiftPackageReference "Erik" */,
 			);
 			productRefGroup = 70C18E1D293678E9009C09D0 /* Products */;
 			projectDirPath = "";
@@ -1181,6 +1220,7 @@
 				701849AA2974C46C00EFC53D /* Persistence.swift in Sources */,
 				701849A92974C45800EFC53D /* SelektorWidgets.swift in Sources */,
 				701849AE2974C48600EFC53D /* Config.swift in Sources */,
+				7061C934299740690031CCEE /* PersistenceV2.swift in Sources */,
 				701849B42974C4D700EFC53D /* Ext.swift in Sources */,
 				701849AC2974C47B00EFC53D /* Selector.swift in Sources */,
 				701849AB2974C46E00EFC53D /* Selektor.xcdatamodeld in Sources */,
@@ -1203,19 +1243,18 @@
 				701849852967DB0F00EFC53D /* ConfigListViewController.swift in Sources */,
 				70D187DD297F50CB003A210F /* SubscribeView.swift in Sources */,
 				706807A72963E9C30013AE63 /* Config.swift in Sources */,
-				70184980296690A100EFC53D /* ConfigView.swift in Sources */,
-				706807BB2963F1960013AE63 /* AlertConfigView.swift in Sources */,
 				706807A42963E9B80013AE63 /* Persistence.swift in Sources */,
 				706807AB2963E9D30013AE63 /* AppGroup.swift in Sources */,
 				70E9F59E29650349007E170D /* SelectorView.swift in Sources */,
-				70E9F5702964B21B007E170D /* PopoverView.swift in Sources */,
 				706807B92963F1860013AE63 /* HistoryView.swift in Sources */,
 				706807B12963EB0F0013AE63 /* Selektor.xcdatamodeld in Sources */,
 				706807A82963E9C60013AE63 /* Duration.swift in Sources */,
 				70E9F56C29641754007E170D /* MainView.swift in Sources */,
 				706807A22963E8C90013AE63 /* AppDelegate.swift in Sources */,
 				706807C02963F1B10013AE63 /* SubscriptionManager.swift in Sources */,
+				7061C91B2992D87E0031CCEE /* PersistenceV2.swift in Sources */,
 				706807AA2963E9CE0013AE63 /* AlertType.swift in Sources */,
+				7061C92D2995CC250031CCEE /* ErikValueSelector.swift in Sources */,
 				706807C22963F1BA0013AE63 /* HTMLCleaner.swift in Sources */,
 				70E9F5722964B35D007E170D /* ViewExt.swift in Sources */,
 				70E9F5A1296505EC007E170D /* NavigationDelegateImpl.swift in Sources */,
@@ -1273,6 +1312,7 @@
 				70E20F5C2953A19500F2B2B3 /* SelectorPreviewView.swift in Sources */,
 				70E20F572952629900F2B2B3 /* CircleTextView.swift in Sources */,
 				70E20EC72939376500F2B2B3 /* ValueSelector.swift in Sources */,
+				7061C9192992D87E0031CCEE /* PersistenceV2.swift in Sources */,
 				70E20EC52939326200F2B2B3 /* MultilineTextField.swift in Sources */,
 				70D187E42980A047003A210F /* CredentialsManager.swift in Sources */,
 				70E20F142946516F00F2B2B3 /* Logger.swift in Sources */,
@@ -1337,6 +1377,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				70E20EFC293E7AF000F2B2B3 /* Result.swift in Sources */,
+				7061C91A2992D87E0031CCEE /* PersistenceV2.swift in Sources */,
 				70E20F1F294BAB6F00F2B2B3 /* LogsView.swift in Sources */,
 				70E20F152946516F00F2B2B3 /* Logger.swift in Sources */,
 				70E20EF9293AA23600F2B2B3 /* Selektor.xcdatamodeld in Sources */,
@@ -1517,10 +1558,11 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SelektorMac/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Selektor;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 Modal Domains LLC";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1552,10 +1594,11 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SelektorMac/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Selektor;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 Modal Domains LLC";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2297,6 +2340,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		7061C91C2992E1400031CCEE /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.34.0;
+			};
+		};
+		7061C9272995C8C50031CCEE /* XCRemoteSwiftPackageReference "Erik" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/phimage/Erik";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 		70680761295D0F320013AE63 /* XCRemoteSwiftPackageReference "swift-msgpack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/csm/swift-msgpack";
@@ -2320,6 +2379,51 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 70680761295D0F320013AE63 /* XCRemoteSwiftPackageReference "swift-msgpack" */;
 			productName = SwiftMsgpackCsm;
+		};
+		7061C91D2992E1400031CCEE /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7061C91C2992E1400031CCEE /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+		7061C91F2992E70A0031CCEE /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7061C91C2992E1400031CCEE /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+		7061C9212992E7180031CCEE /* Realm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7061C91C2992E1400031CCEE /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = Realm;
+		};
+		7061C9232994B7860031CCEE /* Realm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7061C91C2992E1400031CCEE /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = Realm;
+		};
+		7061C9252994B7860031CCEE /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7061C91C2992E1400031CCEE /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+		7061C9282995C8C60031CCEE /* Erik */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7061C9272995C8C50031CCEE /* XCRemoteSwiftPackageReference "Erik" */;
+			productName = Erik;
+		};
+		7061C92A2995C9640031CCEE /* Erik */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7061C9272995C8C50031CCEE /* XCRemoteSwiftPackageReference "Erik" */;
+			productName = Erik;
+		};
+		7061C92E2995F1280031CCEE /* Realm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7061C91C2992E1400031CCEE /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = Realm;
+		};
+		7061C9302995F1280031CCEE /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7061C91C2992E1400031CCEE /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
 		};
 		70680762295D0F320013AE63 /* SwiftMsgpackCsm */ = {
 			isa = XCSwiftPackageProductDependency;
